@@ -1,6 +1,10 @@
 package com.example.Homestay_Booking_System.service;
 
+import java.util.List;
 import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.example.Homestay_Booking_System.domain.User;
@@ -52,4 +56,8 @@ public class UserService {
         return this.userRepository.existsByEmail(email);
     }
 
+    public List<User> handleGetAllUsers(Pageable pageable) {
+        Page<User> pageUser = this.userRepository.findAll(pageable);
+        return pageUser.getContent();
+    }
 }
