@@ -1,23 +1,65 @@
 package com.example.Homestay_Booking_System.controller;
 
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import java.util.Map;
 
-@Controller
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.Homestay_Booking_System.service.AuthService;
+import com.example.Homestay_Booking_System.service.AuthService.TokenPair;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+
+@RestController
 public class AuthController {
 
-    @GetMapping("/login")
-    public String login() {
-        return "login";
+    private final AuthService authService;
+
+    public AuthController(AuthService authService) {
+        this.authService = authService;
     }
 
     @GetMapping("/")
-    public String home() {
-        return "home";
+    public Map<String, String> health() {
+        return Map.of("message", "Homestay Booking System API is running");
+    }
+
+    @PostMapping("/auth/login")
+    public TokenPair login(@Valid @RequestBody LoginRequest request) {
+        return authService.login(request.email(), request.password());
+    }
+
+    @PostMapping("/auth/refresh")
+    public TokenPair refresh(@Valid @RequestBody RefreshRequest request) {
+        return authService.refresh(request.refreshToken());
+    }
+
+    @PostMapping("/auth/logout")
+    public ResponseEntity<Map<String, String>> logout(@RequestBody(required = false) RefreshRequest request) {
+        authService.logout(request == null ? null : request.refreshToken());
+        return ResponseEntity.ok(Map.of("message", "Refresh token revoked"));
     }
 
     @GetMapping("/admin")
-    public String admin() {
-        return "admin";
+    public Map<String, String> admin() {
+        return Map.of("message", "Admin access granted");
     }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<Map<String, String>> handleAuthenticationFailure(AuthenticationException exception) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("message", "Invalid email or password"));
+    }
+
+    public record LoginRequest(@NotBlank @Email String email, @NotBlank String password) {}
+
+    public record RefreshRequest(@NotBlank String refreshToken) {}
 }
