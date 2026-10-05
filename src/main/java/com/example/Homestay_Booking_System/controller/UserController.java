@@ -28,18 +28,13 @@ public class UserController {
     @PostMapping("/users")
     @ApiMessage("Create a new user")
     public ResponseEntity<User> createNewUser(@Valid @RequestBody User postManUser) {
-
-        boolean isEmailExist = this.userService.isEmailExist(postManUser.getEmail());
-
         User createdUser = this.userService.handleCreateUser(postManUser);
-        return ResponseEntity.status(HttpStatus.CREATED).body(this.userService.handleCreateUser(createdUser));
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }
 
     @DeleteMapping("/users/{id}")
     @ApiMessage("Delete a user by ID")
     public ResponseEntity<Void> deleteUser(@PathVariable("id") long id) {
-
-        User currentUser = this.userService.handleGetUserById(id);
 
         this.userService.handleDeleteUser(id);
         return ResponseEntity.ok(null);
@@ -48,16 +43,15 @@ public class UserController {
     @GetMapping("/users/{id}")
     @ApiMessage("Get user by ID")
     public ResponseEntity<User> getUserById(@PathVariable("id") long id) {
-        User getUser = this.userService.handleGetUserById(id);
-
-        return ResponseEntity.status(HttpStatus.OK).body(this.userService.handleGetUserById(id));
+        User user = this.userService.handleGetUserById(id);
+        return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 
     @PutMapping("/users")
     @ApiMessage("Update an existing user")
     public ResponseEntity<User> updateUser(@RequestBody User updatedUser) {
         User resultUser = this.userService.handleUpdateUser(updatedUser);
-        return ResponseEntity.status(HttpStatus.OK).body(this.userService.handleUpdateUser(resultUser));
+        return ResponseEntity.status(HttpStatus.OK).body(resultUser);
     }
 
     // @PostMapping("/auth/logout")
