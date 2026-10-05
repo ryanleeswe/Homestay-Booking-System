@@ -1,5 +1,9 @@
 package com.example.Homestay_Booking_System.controller;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -8,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.Homestay_Booking_System.domain.User;
@@ -52,6 +57,21 @@ public class UserController {
     public ResponseEntity<User> updateUser(@RequestBody User updatedUser) {
         User resultUser = this.userService.handleUpdateUser(updatedUser);
         return ResponseEntity.status(HttpStatus.OK).body(resultUser);
+    }
+
+    @GetMapping("users")
+    @ApiMessage("Get all users with pagination")
+    public ResponseEntity<List<User>> getAllUsers(
+            @RequestParam("current") Optional<String> currentOptional,
+            @RequestParam("pageSize") Optional<String> pageSizeOptional) {
+
+        String currentString = currentOptional.isPresent() ? currentOptional.get() : "";
+        String pageSizeString = pageSizeOptional.isPresent() ? pageSizeOptional.get() : "";
+
+        int current = Integer.parseInt(currentString) - 1;
+        int pageSize = Integer.parseInt(pageSizeString);
+        PageRequest pageable = PageRequest.of(current, pageSize);
+        return ResponseEntity.status(HttpStatus.OK).body(this.userService.handleGetAllUsers(pageable));
     }
 
     // @PostMapping("/auth/logout")
