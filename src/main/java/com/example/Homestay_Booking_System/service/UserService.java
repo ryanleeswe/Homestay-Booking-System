@@ -1,7 +1,6 @@
 package com.example.Homestay_Booking_System.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -9,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.Homestay_Booking_System.domain.User;
 import com.example.Homestay_Booking_System.repository.UserRepository;
+import com.example.Homestay_Booking_System.util.error.IdInvalidException;
 
 @Service
 public class UserService {
@@ -24,27 +24,28 @@ public class UserService {
     }
 
     public void handleDeleteUser(long id) {
+        this.handleGetUserById(id);
         this.userRepository.deleteById(id);
     }
 
     public User handleGetUserById(long id) {
-        Optional<User> userOptional = this.userRepository.findById(id);
-        if (userOptional.isPresent()) {
-            return userOptional.get();
+        if (id <= 0) {
+            throw new IdInvalidException("ID người dùng phải lớn hơn 0");
         }
-        return null;
+        return this.userRepository.findById(id)
+                .orElseThrow(() -> new IdInvalidException("Không tìm thấy người dùng với ID: " + id));
     }
 
     public User handleUpdateUser(User updatedUser) {
-        User currentUser = this.handleGetUserById(updatedUser.getId());
-        if (currentUser != null) {
-            currentUser.setName(updatedUser.getName());
-            currentUser.setPassword(updatedUser.getPassword());
-            currentUser.setEmail(updatedUser.getEmail());
-
-            return this.userRepository.save(currentUser);
+        if (updatedUser.getId() == null) {
+            throw new IdInvalidException("ID người dùng không được để trống");
         }
-        return null;
+        User currentUser = this.handleGetUserById(updatedUser.getId());
+        currentUser.setName(updatedUser.getName());
+        currentUser.setPassword(updatedUser.getPassword());
+        currentUser.setEmail(updatedUser.getEmail());
+
+        return this.userRepository.save(currentUser);
     }
 
     public User findByEmail(String username) {

@@ -1,7 +1,6 @@
 package com.example.Homestay_Booking_System.controller;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -20,6 +19,7 @@ import com.example.Homestay_Booking_System.service.UserService;
 import com.example.Homestay_Booking_System.util.annotation.ApiMessage;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 
 @RestController
 public class UserController {
@@ -54,7 +54,7 @@ public class UserController {
 
     @PutMapping("/users")
     @ApiMessage("Update an existing user")
-    public ResponseEntity<User> updateUser(@RequestBody User updatedUser) {
+    public ResponseEntity<User> updateUser(@Valid @RequestBody User updatedUser) {
         User resultUser = this.userService.handleUpdateUser(updatedUser);
         return ResponseEntity.status(HttpStatus.OK).body(resultUser);
     }
@@ -62,15 +62,9 @@ public class UserController {
     @GetMapping("users")
     @ApiMessage("Get all users with pagination")
     public ResponseEntity<List<User>> getAllUsers(
-            @RequestParam("current") Optional<String> currentOptional,
-            @RequestParam("pageSize") Optional<String> pageSizeOptional) {
-
-        String currentString = currentOptional.isPresent() ? currentOptional.get() : "";
-        String pageSizeString = pageSizeOptional.isPresent() ? pageSizeOptional.get() : "";
-
-        int current = Integer.parseInt(currentString) - 1;
-        int pageSize = Integer.parseInt(pageSizeString);
-        PageRequest pageable = PageRequest.of(current, pageSize);
+            @RequestParam(value = "current", defaultValue = "1") @Min(1) int current,
+            @RequestParam(value = "pageSize", defaultValue = "10") @Min(1) int pageSize) {
+        PageRequest pageable = PageRequest.of(current - 1, pageSize);
         return ResponseEntity.status(HttpStatus.OK).body(this.userService.handleGetAllUsers(pageable));
     }
 
