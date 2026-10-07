@@ -2,14 +2,14 @@ package com.example.Homestay_Booking_System.service;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.server.ResponseStatusException;
 
 import com.example.Homestay_Booking_System.domain.User;
 import com.example.Homestay_Booking_System.repository.UserRepository;
@@ -49,7 +49,7 @@ public class UserService {
         User currentUser = findUserOrThrow(updatedUser.getId());
         assertOwnerOrAdmin(currentUser);
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication = getAuthenticatedUser();
         boolean isAdmin = hasAdminRole(authentication);
         if (!isAdmin && !Objects.equals(currentUser.getEmail(), updatedUser.getEmail())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN,
@@ -86,7 +86,7 @@ public class UserService {
     }
 
     private void assertOwnerOrAdmin(User user) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication = getAuthenticatedUser();
         String currentUserEmail = authentication.getName();
         boolean isAdmin = hasAdminRole(authentication);
         if (!isAdmin && !user.getEmail().equals(currentUserEmail)) {
@@ -94,7 +94,19 @@ public class UserService {
         }
     }
 
+    private Authentication getAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+                || (authentication instanceof AnonymousAuthenticationToken)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
+        }
+        return authentication;
+    }
+
     private boolean hasAdminRole(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return false;
+        }
         return authentication.getAuthorities().stream()
                 .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
     }
