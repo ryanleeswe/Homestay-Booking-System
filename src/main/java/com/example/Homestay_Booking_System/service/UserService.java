@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.example.Homestay_Booking_System.domain.User;
 import com.example.Homestay_Booking_System.repository.UserRepository;
+import com.example.Homestay_Booking_System.util.error.IdInvalidException;
 
 @Service
 public class UserService {
@@ -80,7 +81,13 @@ public class UserService {
         return this.userRepository.existsByEmail(email);
     }
 
-    private User findUserOrThrow(long id) {
+    private User findUserOrThrow(Long id) {
+        if (id == null) {
+            throw new IdInvalidException("ID người dùng không được để trống");
+        }
+        if (id <= 0) {
+            throw new IdInvalidException("ID người dùng phải lớn hơn 0");
+        }
         return this.userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
