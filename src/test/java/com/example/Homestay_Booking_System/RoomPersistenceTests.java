@@ -1,6 +1,7 @@
 package com.example.Homestay_Booking_System;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import com.example.Homestay_Booking_System.domain.*;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
@@ -13,6 +14,8 @@ class RoomPersistenceTests {
     void persistsRelationsAndEnforcesBothForeignKeys() {
         try (SessionFactory factory = new Configuration().addAnnotatedClass(Room.class)
                 .addAnnotatedClass(Homestay.class).addAnnotatedClass(Booking.class)
+                .addAnnotatedClass(User.class).addAnnotatedClass(Review.class)
+                .addAnnotatedClass(Amenity.class)
                 .setProperty("hibernate.connection.driver_class", "org.h2.Driver")
                 .setProperty("hibernate.connection.url", "jdbc:h2:mem:room_test;MODE=MySQL")
                 .setProperty("hibernate.hbm2ddl.auto", "create-drop").buildSessionFactory()) {
@@ -20,13 +23,31 @@ class RoomPersistenceTests {
             Long homestayId;
             try (var session = factory.openSession()) {
                 var transaction = session.beginTransaction();
-                Homestay homestay = new Homestay(); homestay.setName("Test homestay");
+                Homestay homestay = new Homestay();
+                homestay.setName("Test homestay");
+                homestay.setLocation("Test location");
+                homestay.setDescription("Test description");
+                homestay.setPrice(new BigDecimal("500000.00"));
+                homestay.setNumberOfGuests(2);
                 session.persist(homestay);
-                Room room = new Room(); room.setName("101"); room.setCapacity(2);
+                Room room = new Room(); room.setName("101"); room.setMaxGuests(2);
                 room.setPricePerNight(new BigDecimal("500000.00")); room.setHomestay(homestay);
                 session.persist(room);
                 for (int i = 0; i < 2; i++) {
-                    Booking booking = new Booking(); booking.setRoom(room); session.persist(booking);
+                    User user = new User();
+                    user.setName("Test user " + i);
+                    user.setEmail("test" + i + "@example.com");
+                    user.setPassword("password");
+                    session.persist(user);
+
+                    Booking booking = new Booking();
+                    booking.setUser(user);
+                    booking.setHomestay(homestay);
+                    booking.setRoom(room);
+                    booking.setCheckInDate(LocalDate.of(2026, 1, 10 + i));
+                    booking.setCheckOutDate(LocalDate.of(2026, 1, 11 + i));
+                    booking.setTotalPrice(new BigDecimal("500000.00"));
+                    session.persist(booking);
                 }
                 transaction.commit(); roomId = room.getId(); homestayId = homestay.getId();
             }
@@ -34,7 +55,7 @@ class RoomPersistenceTests {
                 Room room = session.find(Room.class, roomId);
                 assertEquals(homestayId, room.getHomestay().getId());
                 assertEquals(2, room.getBookings().size());
-                assertEquals(roomId, room.getBookings().getFirst().getRoom().getId());
+                assertEquals(roomId, room.getBookings().get(0).getRoom().getId());
                 assertEquals(1, session.find(Homestay.class, homestayId).getRooms().size());
                 assertEquals(new BigDecimal("500000.00"), room.getPricePerNight());
             }

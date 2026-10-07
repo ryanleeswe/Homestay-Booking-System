@@ -1,4 +1,4 @@
-package com.example.Homestay_Booking_System.domain.dto;
+package com.example.Homestay_Booking_System.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;

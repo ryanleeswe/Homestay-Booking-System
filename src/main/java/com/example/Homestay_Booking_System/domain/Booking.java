@@ -19,10 +19,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
-<<<<<<< HEAD
-=======
-/** Minimal entity for the room relationship; booking workflow is a separate feature. */
->>>>>>> fe34ed422146e3afa2a9f50887dedd31db236566
 @Entity
 @Table(name = "bookings")
 @Getter

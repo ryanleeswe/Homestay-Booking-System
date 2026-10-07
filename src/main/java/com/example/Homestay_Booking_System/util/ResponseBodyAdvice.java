@@ -1,6 +1,6 @@
 package com.example.Homestay_Booking_System.util;
 
-import com.example.Homestay_Booking_System.domain.dto.RestResponse;
+import com.example.Homestay_Booking_System.dto.response.RestResponse;
 import com.example.Homestay_Booking_System.util.annotation.ApiMessage;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;

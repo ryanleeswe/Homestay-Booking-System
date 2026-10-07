@@ -6,7 +6,7 @@ import com.example.Homestay_Booking_System.config.SecurityConfig;
 import com.example.Homestay_Booking_System.controller.AuthController;
 import com.example.Homestay_Booking_System.controller.UserController;
 import com.example.Homestay_Booking_System.domain.User;
-import com.example.Homestay_Booking_System.domain.dto.RestResponse;
+import com.example.Homestay_Booking_System.dto.response.RestResponse;
 import com.example.Homestay_Booking_System.service.AuthService;
 import com.example.Homestay_Booking_System.service.UserService;
 import com.example.Homestay_Booking_System.util.ResponseBodyAdvice;
