@@ -2,17 +2,19 @@ package com.example.Homestay_Booking_System.service;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.example.Homestay_Booking_System.domain.User;
 import com.example.Homestay_Booking_System.repository.UserRepository;
+import com.example.Homestay_Booking_System.util.error.IdInvalidException;
 
 @Service
 public class UserService {
@@ -80,13 +82,23 @@ public class UserService {
         return this.userRepository.existsByEmail(email);
     }
 
-    private User findUserOrThrow(long id) {
+    private User findUserOrThrow(Long id) {
+        if (id == null) {
+            throw new IdInvalidException("ID người dùng không được để trống");
+        }
+        if (id <= 0) {
+            throw new IdInvalidException("ID người dùng phải lớn hơn 0");
+        }
         return this.userRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
 
     private void assertOwnerOrAdmin(User user) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+                || authentication instanceof AnonymousAuthenticationToken) {
+            throw new AuthenticationCredentialsNotFoundException("Authentication is required");
+        }
         String currentUserEmail = authentication.getName();
         boolean isAdmin = hasAdminRole(authentication);
         if (!isAdmin && !user.getEmail().equals(currentUserEmail)) {
