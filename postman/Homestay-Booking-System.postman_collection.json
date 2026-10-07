@@ -1,0 +1,99 @@
+{
+  "info": {
+    "name": "Homestay Booking System API",
+    "description": "Collection chạy thử API local. Hãy gửi request theo thứ tự; các request tạo dữ liệu sẽ tự lưu ID vào collection variables.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "userId", "value": "" },
+    { "key": "homestayId", "value": "" },
+    { "key": "roomId", "value": "" },
+    { "key": "amenityId", "value": "" },
+    { "key": "bookingId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Create user",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Created', () => pm.response.to.have.status(201));", "const data = pm.response.json();", "pm.collectionVariables.set('userId', data.id);"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Nguyen Van A\",\n  \"email\": \"guest{{$timestamp}}@example.com\",\n  \"password\": \"secret123\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/users" }
+        },
+        {
+          "name": "Update user",
+          "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"id\": {{userId}},\n  \"name\": \"Nguyen Van A Updated\",\n  \"email\": \"guest.updated@example.com\",\n  \"password\": \"secret123\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/users" }
+        }
+      ]
+    },
+    {
+      "name": "Homestays",
+      "item": [
+        {
+          "name": "Create homestay",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Created', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('homestayId', pm.response.json().id);"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"ownerId\": {{userId}},\n  \"name\": \"Da Lat Garden Stay\",\n  \"location\": \"Da Lat\",\n  \"description\": \"A cozy homestay for testing\",\n  \"price\": 800000,\n  \"numberOfGuests\": 4,\n  \"available\": true\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/homestays" }
+        },
+        { "name": "List homestays", "request": { "method": "GET", "url": "{{baseUrl}}/homestays" } },
+        { "name": "List available homestays", "request": { "method": "GET", "url": "{{baseUrl}}/homestays/available" } },
+        { "name": "Get homestay by ID", "request": { "method": "GET", "url": "{{baseUrl}}/homestays/{{homestayId}}" } },
+        { "name": "List homestays by owner", "request": { "method": "GET", "url": "{{baseUrl}}/homestays/owner/{{userId}}" } },
+        {
+          "name": "Update homestay",
+          "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"ownerId\": {{userId}},\n  \"name\": \"Da Lat Garden Stay Updated\",\n  \"location\": \"Da Lat\",\n  \"description\": \"Updated homestay description\",\n  \"price\": 850000,\n  \"numberOfGuests\": 5,\n  \"available\": true\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/homestays/{{homestayId}}" }
+        }
+      ]
+    },
+    {
+      "name": "Rooms and amenities",
+      "item": [
+        {
+          "name": "Create room",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Created', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('roomId', pm.response.json().id);"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"Deluxe Room\",\n  \"maxGuests\": 2,\n  \"pricePerNight\": 950000\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/homestays/{{homestayId}}/rooms" }
+        },
+        { "name": "List rooms", "request": { "method": "GET", "url": "{{baseUrl}}/homestays/{{homestayId}}/rooms" } },
+        {
+          "name": "Create amenity",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Created', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('amenityId', pm.response.json().id);"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"name\": \"WiFi\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/amenities" }
+        },
+        { "name": "Attach amenity to homestay", "request": { "method": "POST", "url": "{{baseUrl}}/homestays/{{homestayId}}/amenities/{{amenityId}}" } },
+        { "name": "List homestay amenities", "request": { "method": "GET", "url": "{{baseUrl}}/homestays/{{homestayId}}/amenities" } }
+      ]
+    },
+    {
+      "name": "Bookings and reviews",
+      "item": [
+        {
+          "name": "Create booking",
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('Created', () => pm.response.to.have.status(201));", "pm.collectionVariables.set('bookingId', pm.response.json().id);"] } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"userId\": {{userId}},\n  \"homestayId\": {{homestayId}},\n  \"roomId\": {{roomId}},\n  \"checkInDate\": \"2027-12-10\",\n  \"checkOutDate\": \"2027-12-12\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/bookings" }
+        },
+        { "name": "List bookings", "request": { "method": "GET", "url": "{{baseUrl}}/bookings" } },
+        { "name": "Get booking by ID", "request": { "method": "GET", "url": "{{baseUrl}}/bookings/{{bookingId}}" } },
+        { "name": "List bookings by user", "request": { "method": "GET", "url": "{{baseUrl}}/bookings/user/{{userId}}" } },
+        { "name": "List bookings by homestay", "request": { "method": "GET", "url": "{{baseUrl}}/bookings/homestay/{{homestayId}}" } },
+        {
+          "name": "Update booking (only while PENDING)",
+          "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"userId\": {{userId}},\n  \"homestayId\": {{homestayId}},\n  \"roomId\": {{roomId}},\n  \"checkInDate\": \"2027-12-11\",\n  \"checkOutDate\": \"2027-12-13\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/bookings/{{bookingId}}" }
+        },
+        {
+          "name": "Complete booking (required before review)",
+          "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"status\": \"COMPLETED\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/bookings/{{bookingId}}/status" }
+        },
+        {
+          "name": "Create review",
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"rating\": 5,\n  \"comment\": \"Great stay\"\n}", "options": { "raw": { "language": "json" } } }, "url": "{{baseUrl}}/bookings/{{bookingId}}/review" }
+        },
+        { "name": "Get review", "request": { "method": "GET", "url": "{{baseUrl}}/bookings/{{bookingId}}/review" } },
+        { "name": "Delete booking (run last)", "request": { "method": "DELETE", "url": "{{baseUrl}}/bookings/{{bookingId}}" } }
+      ]
+    },
+    {
+      "name": "Delete homestay (run last)",
+      "request": { "method": "DELETE", "url": "{{baseUrl}}/homestays/{{homestayId}}" }
+    }
+  ]
+}
