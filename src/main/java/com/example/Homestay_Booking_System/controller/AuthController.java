@@ -3,6 +3,7 @@ package com.example.Homestay_Booking_System.controller;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,9 +45,9 @@ public class AuthController {
 
     @PostMapping("/auth/logout")
     @ApiMessage("Đăng xuất thành công")
-    public ResponseEntity<Map<String, String>> logout(@RequestBody(required = false) RefreshRequest request) {
-        authService.logout(request == null ? null : request.refreshToken());
-        return ResponseEntity.ok(Map.of("message", "Refresh token revoked"));
+    public ResponseEntity<Map<String, String>> logout(Authentication authentication) {
+        authService.logout(authentication.getName());
+        return ResponseEntity.ok(Map.of("message", "Logged out; refresh tokens revoked"));
     }
 
     @GetMapping("/admin")
