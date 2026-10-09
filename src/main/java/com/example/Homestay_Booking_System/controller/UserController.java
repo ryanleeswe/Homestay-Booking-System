@@ -15,13 +15,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.Homestay_Booking_System.domain.User;
+import com.example.Homestay_Booking_System.dto.response.UserResponse;
 import com.example.Homestay_Booking_System.service.UserService;
 import com.example.Homestay_Booking_System.util.annotation.ApiMessage;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 
 @RestController
+@Tag(name = "Users", description = "Đăng ký và quản lý người dùng")
 public class UserController {
 
     private final UserService userService;
@@ -39,6 +44,7 @@ public class UserController {
 
     @DeleteMapping("/users/{id}")
     @ApiMessage("Delete a user by ID")
+    @Operation(summary = "Xóa user", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<Void> deleteUser(@PathVariable("id") long id) {
 
         this.userService.handleDeleteUser(id);
@@ -47,6 +53,7 @@ public class UserController {
 
     @GetMapping("/users/{id}")
     @ApiMessage("Get user by ID")
+    @Operation(summary = "Xem user theo ID", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<User> getUserById(@PathVariable("id") long id) {
         User user = this.userService.handleGetUserById(id);
         return ResponseEntity.status(HttpStatus.OK).body(user);
@@ -54,6 +61,7 @@ public class UserController {
 
     @PutMapping("/users")
     @ApiMessage("Update an existing user")
+    @Operation(summary = "Cập nhật user", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<User> updateUser(@Valid @RequestBody User updatedUser) {
         User resultUser = this.userService.handleUpdateUser(updatedUser);
         return ResponseEntity.status(HttpStatus.OK).body(resultUser);
@@ -61,11 +69,15 @@ public class UserController {
 
     @GetMapping("users")
     @ApiMessage("Get all users with pagination")
-    public ResponseEntity<List<User>> getAllUsers(
+    @Operation(summary = "Xem danh sách user", security = @SecurityRequirement(name = "bearerAuth"))
+    public ResponseEntity<List<UserResponse>> getAllUsers(
             @RequestParam(value = "current", defaultValue = "1") @Min(1) int current,
             @RequestParam(value = "pageSize", defaultValue = "10") @Min(1) int pageSize) {
         PageRequest pageable = PageRequest.of(current - 1, pageSize);
-        return ResponseEntity.status(HttpStatus.OK).body(this.userService.handleGetAllUsers(pageable));
+        List<UserResponse> users = this.userService.handleGetAllUsers(pageable).stream()
+                .map(UserResponse::from)
+                .toList();
+        return ResponseEntity.status(HttpStatus.OK).body(users);
     }
 
     // @PostMapping("/auth/logout")

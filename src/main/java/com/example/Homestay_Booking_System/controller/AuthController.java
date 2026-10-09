@@ -12,12 +12,16 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.Homestay_Booking_System.service.AuthService;
 import com.example.Homestay_Booking_System.service.AuthService.TokenPair;
 import com.example.Homestay_Booking_System.util.annotation.ApiMessage;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 @RestController
+@Tag(name = "Authentication", description = "Đăng nhập, làm mới token và đăng xuất")
 public class AuthController {
 
     private final AuthService authService;
@@ -45,12 +49,14 @@ public class AuthController {
 
     @PostMapping("/auth/logout")
     @ApiMessage("Đăng xuất thành công")
+    @Operation(summary = "Đăng xuất", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<Map<String, String>> logout(Authentication authentication) {
         authService.logout(authentication.getName());
         return ResponseEntity.ok(Map.of("message", "Logged out; refresh tokens revoked"));
     }
 
     @GetMapping("/admin")
+    @Operation(summary = "Kiểm tra quyền admin", security = @SecurityRequirement(name = "bearerAuth"))
     public Map<String, String> admin() {
         return Map.of("message", "Admin access granted");
     }

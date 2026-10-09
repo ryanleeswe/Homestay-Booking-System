@@ -17,9 +17,13 @@ import com.example.Homestay_Booking_System.dto.response.ReviewResponse;
 import com.example.Homestay_Booking_System.repository.BookingRepository;
 import com.example.Homestay_Booking_System.repository.ReviewRepository;
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/bookings/{bookingId}/review")
+@Tag(name = "Reviews", description = "Tạo và xem đánh giá đặt phòng")
+@SecurityRequirement(name = "bearerAuth")
 public class ReviewController {
     private final BookingRepository bookings;
     private final ReviewRepository reviews;

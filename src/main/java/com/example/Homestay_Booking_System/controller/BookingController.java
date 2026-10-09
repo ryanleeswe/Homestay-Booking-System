@@ -21,10 +21,14 @@ import com.example.Homestay_Booking_System.dto.request.BookingStatusRequest;
 import com.example.Homestay_Booking_System.dto.response.BookingResponse;
 import com.example.Homestay_Booking_System.service.BookingService;
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 
 @RestController
 @RequestMapping("/bookings")
+@Tag(name = "Bookings", description = "Tạo và quản lý đặt phòng")
+@SecurityRequirement(name = "bearerAuth")
 public class BookingController {
     private final BookingService bookingService;
 
