@@ -23,7 +23,11 @@ public class ResponseBodyAdvice implements org.springframework.web.servlet.mvc.m
 
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-        return true;
+        // Only wrap responses returned by this application's REST controllers.
+        // Springdoc and framework handlers may return byte[]; wrapping those as
+        // RestResponse makes ByteArrayHttpMessageConverter throw ClassCastException.
+        return returnType.getContainingClass().getPackageName()
+                .startsWith("com.example.Homestay_Booking_System.controller");
     }
 
     @Override

@@ -21,6 +21,7 @@ import com.example.Homestay_Booking_System.dto.request.BookingStatusRequest;
 import com.example.Homestay_Booking_System.dto.response.BookingResponse;
 import com.example.Homestay_Booking_System.service.BookingService;
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -35,33 +36,41 @@ public class BookingController {
     public BookingController(BookingService bookingService) { this.bookingService = bookingService; }
 
     @GetMapping
+    @Operation(summary = "Xem tất cả lượt đặt phòng")
     public List<BookingResponse> getAll() { return bookingService.getAll().stream().map(BookingResponse::from).toList(); }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Xem lượt đặt phòng theo ID")
     public BookingResponse getById(@PathVariable Long id) { return BookingResponse.from(bookingService.getById(id)); }
 
     @GetMapping("/user/{userId}")
+    @Operation(summary = "Xem lượt đặt phòng của user")
     public List<BookingResponse> getByUser(@PathVariable Long userId) { return bookingService.getByUser(userId).stream().map(BookingResponse::from).toList(); }
 
     @GetMapping("/homestay/{homestayId}")
+    @Operation(summary = "Xem lượt đặt phòng của homestay")
     public List<BookingResponse> getByHomestay(@PathVariable Long homestayId) { return bookingService.getByHomestay(homestayId).stream().map(BookingResponse::from).toList(); }
 
     @PostMapping
+    @Operation(summary = "Tạo lượt đặt phòng")
     public ResponseEntity<BookingResponse> create(@Valid @RequestBody BookingRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(BookingResponse.from(bookingService.create(toEntity(request))));
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Cập nhật lượt đặt phòng")
     public BookingResponse update(@PathVariable Long id, @Valid @RequestBody BookingRequest request) {
         return BookingResponse.from(bookingService.update(id, toEntity(request)));
     }
 
     @PutMapping("/{id}/status")
+    @Operation(summary = "Cập nhật trạng thái đặt phòng")
     public BookingResponse changeStatus(@PathVariable Long id, @Valid @RequestBody BookingStatusRequest request) {
         return BookingResponse.from(bookingService.changeStatus(id, request.status()));
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Xóa lượt đặt phòng")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         return bookingService.delete(id) ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }

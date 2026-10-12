@@ -17,6 +17,7 @@ import com.example.Homestay_Booking_System.dto.response.ReviewResponse;
 import com.example.Homestay_Booking_System.repository.BookingRepository;
 import com.example.Homestay_Booking_System.repository.ReviewRepository;
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
@@ -34,6 +35,7 @@ public class ReviewController {
     }
 
     @PostMapping
+    @Operation(summary = "Tạo đánh giá cho lượt đặt phòng đã hoàn thành")
     public ResponseEntity<ReviewResponse> create(@PathVariable Long bookingId, @Valid @RequestBody ReviewRequest request) {
         Booking booking = bookings.findById(bookingId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
@@ -50,6 +52,7 @@ public class ReviewController {
     }
 
     @GetMapping
+    @Operation(summary = "Xem đánh giá của lượt đặt phòng")
     public ReviewResponse get(@PathVariable Long bookingId) {
         return ReviewResponse.from(reviews.findByBookingId(bookingId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found")));

@@ -37,6 +37,7 @@ public class UserController {
 
     @PostMapping("/users")
     @ApiMessage("Create a new user")
+    @Operation(summary = "Đăng ký tài khoản USER")
     public ResponseEntity<User> createNewUser(@Valid @RequestBody User postManUser) {
         User createdUser = this.userService.handleCreateUser(postManUser);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);

@@ -31,18 +31,21 @@ public class AuthController {
     }
 
     @GetMapping("/")
+    @Operation(summary = "Kiểm tra API có đang chạy")
     public Map<String, String> health() {
         return Map.of("message", "Homestay Booking System API is running");
     }
 
     @PostMapping("/auth/login")
     @ApiMessage("Đăng nhập thành công")
+    @Operation(summary = "Đăng nhập và nhận access token cùng refresh token")
     public TokenPair login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request.email(), request.password());
     }
 
     @PostMapping("/auth/refresh")
     @ApiMessage("Làm mới token thành công")
+    @Operation(summary = "Dùng refresh token để cấp cặp token mới")
     public TokenPair refresh(@Valid @RequestBody RefreshRequest request) {
         return authService.refresh(request.refreshToken());
     }

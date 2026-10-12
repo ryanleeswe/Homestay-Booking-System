@@ -35,11 +35,13 @@ public class HomestayController {
     }
 
     @GetMapping
+    @Operation(summary = "Xem tất cả homestay")
     public ResponseEntity<List<HomestayResponse>> getAll() {
         return ResponseEntity.ok(homestayService.getAllHomestays().stream().map(HomestayResponse::from).toList());
     }
 
     @GetMapping("/available")
+    @Operation(summary = "Xem các homestay đang còn phòng")
     public ResponseEntity<List<HomestayResponse>> getAvailable() {
         return ResponseEntity.ok(homestayService.getAvailableHomestays().stream().map(HomestayResponse::from).toList());
     }
@@ -51,6 +53,7 @@ public class HomestayController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Xem chi tiết homestay")
     public ResponseEntity<HomestayResponse> getById(@PathVariable Long id) {
         return homestayService.getHomestayById(id)
                 .map(HomestayResponse::from).map(ResponseEntity::ok)
