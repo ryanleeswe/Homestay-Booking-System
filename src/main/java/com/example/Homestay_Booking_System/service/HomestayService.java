@@ -10,6 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.example.Homestay_Booking_System.domain.User;
 import com.example.Homestay_Booking_System.domain.Homestay;
+import com.example.Homestay_Booking_System.domain.HomestayStatus;
 import com.example.Homestay_Booking_System.repository.BookingRepository;
 import com.example.Homestay_Booking_System.repository.HomestayRepository;
 import com.example.Homestay_Booking_System.repository.UserRepository;
@@ -27,7 +28,7 @@ public class HomestayService {
     }
 
     public List<Homestay> getAllHomestays() { return homestayRepository.findAll(); }
-    public List<Homestay> getAvailableHomestays() { return homestayRepository.findByAvailableTrue(); }
+    public List<Homestay> getAvailableHomestays() { return homestayRepository.findByStatus(HomestayStatus.APPROVED); }
     public List<Homestay> getHomestaysByOwner(Long ownerId) {
         findOwner(ownerId);
         return homestayRepository.findByOwnerId(ownerId);
@@ -49,7 +50,7 @@ public class HomestayService {
             existing.setDescription(details.getDescription());
             existing.setPrice(details.getPrice());
             existing.setNumberOfGuests(details.getNumberOfGuests());
-            existing.setAvailable(details.isAvailable());
+            existing.setStatus(details.getStatus());
             return homestayRepository.save(existing);
         });
     }

@@ -9,11 +9,12 @@ import com.example.Homestay_Booking_System.domain.PaymentStatus;
 
 public record BookingResponse(Long id, Long userId, Long homestayId, String homestayName,
         Long roomId, LocalDate checkInDate, LocalDate checkOutDate, BigDecimal totalPrice,
-        BookingStatus status, PaymentStatus paymentStatus) {
+        BigDecimal nightlyPrice, int numGuests, BookingStatus status, PaymentStatus paymentStatus) {
     public static BookingResponse from(Booking booking) {
         return new BookingResponse(booking.getId(), booking.getUser().getId(), booking.getHomestay().getId(),
                 booking.getHomestay().getName(), booking.getRoom() == null ? null : booking.getRoom().getId(),
-                booking.getCheckInDate(), booking.getCheckOutDate(), booking.getTotalPrice(),
+                booking.getCheckInDate(), booking.getCheckOutDate(), booking.getTotalPrice(), booking.getNightlyPrice(),
+                booking.getNumGuests(),
                 booking.getStatus(), booking.getPaymentStatus());
     }
 }

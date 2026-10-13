@@ -6,6 +6,8 @@ import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -53,8 +55,9 @@ public class Homestay {
     @Column(nullable = false)
     private int numberOfGuests;
 
-    @Column(nullable = false)
-    private boolean available = true;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20, columnDefinition = "varchar(20) default 'APPROVED'")
+    private HomestayStatus status = HomestayStatus.APPROVED;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
@@ -71,4 +74,14 @@ public class Homestay {
             joinColumns = @JoinColumn(name = "homestay_id"),
             inverseJoinColumns = @JoinColumn(name = "amenity_id"))
     private List<Amenity> amenities = new ArrayList<>();
+
+    @jakarta.persistence.Transient
+    public boolean isAvailable() {
+        return status == HomestayStatus.APPROVED;
+    }
+
+    @jakarta.persistence.Transient
+    public void setAvailable(boolean available) {
+        status = available ? HomestayStatus.APPROVED : HomestayStatus.INACTIVE;
+    }
 }

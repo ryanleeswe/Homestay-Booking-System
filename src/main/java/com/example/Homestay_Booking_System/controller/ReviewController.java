@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.security.core.Authentication;
 import com.example.Homestay_Booking_System.domain.Booking;
 import com.example.Homestay_Booking_System.domain.BookingStatus;
 import com.example.Homestay_Booking_System.domain.Review;
@@ -36,9 +37,12 @@ public class ReviewController {
 
     @PostMapping
     @Operation(summary = "Tạo đánh giá cho lượt đặt phòng đã hoàn thành")
-    public ResponseEntity<ReviewResponse> create(@PathVariable Long bookingId, @Valid @RequestBody ReviewRequest request) {
+    public ResponseEntity<ReviewResponse> create(@PathVariable Long bookingId, @Valid @RequestBody ReviewRequest request,
+            Authentication authentication) {
         Booking booking = bookings.findById(bookingId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
+        if (!booking.getUser().getEmail().equals(authentication.getName()))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the booking owner can submit a review");
         if (booking.getStatus() != BookingStatus.COMPLETED)
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Only completed bookings can be reviewed");
         if (reviews.existsByBookingId(bookingId))

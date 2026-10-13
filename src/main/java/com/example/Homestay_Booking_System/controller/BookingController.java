@@ -90,6 +90,9 @@ public class BookingController {
         }
         booking.setCheckInDate(request.checkInDate());
         booking.setCheckOutDate(request.checkOutDate());
+        if (request.numGuests() != null) {
+            booking.setNumGuests(request.numGuests());
+        }
         return booking;
     }
 }

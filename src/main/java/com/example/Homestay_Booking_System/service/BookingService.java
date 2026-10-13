@@ -49,9 +49,11 @@ public class BookingService {
         booking.setRoom(resolveRoom(request.getRoom(), booking.getHomestay()));
         booking.setCheckInDate(request.getCheckInDate());
         booking.setCheckOutDate(request.getCheckOutDate());
+        validateGuestCount(booking);
         booking.setStatus(BookingStatus.PENDING);
         validateDates(booking);
         ensureAvailable(booking, null);
+        booking.setNightlyPrice(currentNightlyPrice(booking));
         booking.setTotalPrice(calculatePrice(booking));
         return bookingRepository.save(booking);
     }
@@ -66,8 +68,10 @@ public class BookingService {
         booking.setRoom(resolveRoom(request.getRoom(), booking.getHomestay()));
         booking.setCheckInDate(request.getCheckInDate());
         booking.setCheckOutDate(request.getCheckOutDate());
+        validateGuestCount(booking);
         validateDates(booking);
         ensureAvailable(booking, id);
+        booking.setNightlyPrice(currentNightlyPrice(booking));
         booking.setTotalPrice(calculatePrice(booking));
         return bookingRepository.save(booking);
     }
@@ -75,10 +79,18 @@ public class BookingService {
     @Transactional
     public Booking changeStatus(Long id, BookingStatus status) {
         Booking booking = getById(id);
+        if (status == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Booking status is required");
         if (booking.getStatus() == BookingStatus.CANCELLED || booking.getStatus() == BookingStatus.COMPLETED)
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Booking is already finalized");
-        if (status == null || status == BookingStatus.PENDING)
+        if (status == BookingStatus.PENDING)
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A final booking status is required");
+        if (status == BookingStatus.CONFIRMED && booking.getStatus() != BookingStatus.PENDING)
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Only pending bookings can be confirmed");
+        if (status == BookingStatus.COMPLETED && booking.getStatus() != BookingStatus.CONFIRMED)
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Only confirmed bookings can be completed");
+        if (status == BookingStatus.CONFIRMED)
+            ensureAvailable(booking, booking.getId());
         booking.setStatus(status);
         return bookingRepository.save(booking);
     }
@@ -101,7 +113,8 @@ public class BookingService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "homestay.id is required");
         Homestay result = homestayRepository.findById(reference.getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Homestay not found"));
-        if (!result.isAvailable()) throw new ResponseStatusException(HttpStatus.CONFLICT, "Homestay is unavailable");
+        if (result.getStatus() != com.example.Homestay_Booking_System.domain.HomestayStatus.APPROVED)
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Homestay is unavailable");
         return result;
     }
 
@@ -122,6 +135,17 @@ public class BookingService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Check-in must be in the future and check-out after check-in");
     }
 
+    private void validateGuestCount(Booking booking) {
+        if (booking.getNumGuests() < 1)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "At least one guest is required");
+        int capacity = booking.getRoom() == null
+                ? booking.getHomestay().getNumberOfGuests()
+                : booking.getRoom().getMaxGuests();
+        if (booking.getNumGuests() > capacity)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Number of guests exceeds the accommodation capacity");
+    }
+
     private void ensureAvailable(Booking booking, Long ignoredId) {
         Long requestedRoomId = booking.getRoom() == null ? null : booking.getRoom().getId();
         boolean conflict = bookingRepository.findByHomestayId(booking.getHomestay().getId()).stream()
@@ -139,9 +163,12 @@ public class BookingService {
 
     private BigDecimal calculatePrice(Booking booking) {
         long nights = ChronoUnit.DAYS.between(booking.getCheckInDate(), booking.getCheckOutDate());
-        BigDecimal nightlyPrice = booking.getRoom() == null
+        return booking.getNightlyPrice().multiply(BigDecimal.valueOf(nights));
+    }
+
+    private BigDecimal currentNightlyPrice(Booking booking) {
+        return booking.getRoom() == null
                 ? booking.getHomestay().getPrice()
                 : booking.getRoom().getPricePerNight();
-        return nightlyPrice.multiply(BigDecimal.valueOf(nights));
     }
 }
