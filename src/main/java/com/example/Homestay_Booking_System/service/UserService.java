@@ -1,10 +1,15 @@
 package com.example.Homestay_Booking_System.service;
 
 import java.util.List;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import java.util.Objects;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.example.Homestay_Booking_System.domain.User;
 import com.example.Homestay_Booking_System.repository.UserRepository;
@@ -13,38 +18,57 @@ import com.example.Homestay_Booking_System.util.error.IdInvalidException;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public User handleCreateUser(User user) {
-
+        if (isEmailExist(user.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email is already registered");
+        }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRole(com.example.Homestay_Booking_System.domain.Role.USER);
         return this.userRepository.save(user);
     }
 
     public void handleDeleteUser(long id) {
-        this.handleGetUserById(id);
-        this.userRepository.deleteById(id);
+        User user = findUserOrThrow(id);
+        assertOwnerOrAdmin(user);
+        this.userRepository.delete(user);
     }
 
     public User handleGetUserById(long id) {
-        if (id <= 0) {
-            throw new IdInvalidException("ID người dùng phải lớn hơn 0");
-        }
-        return this.userRepository.findById(id)
-                .orElseThrow(() -> new IdInvalidException("Không tìm thấy người dùng với ID: " + id));
+        User user = findUserOrThrow(id);
+        assertOwnerOrAdmin(user);
+        return user;
     }
 
     public User handleUpdateUser(User updatedUser) {
-        if (updatedUser.getId() == null) {
-            throw new IdInvalidException("ID người dùng không được để trống");
-        }
-        User currentUser = this.handleGetUserById(updatedUser.getId());
-        currentUser.setName(updatedUser.getName());
-        currentUser.setPassword(updatedUser.getPassword());
-        currentUser.setEmail(updatedUser.getEmail());
+        User currentUser = findUserOrThrow(updatedUser.getId());
+        assertOwnerOrAdmin(currentUser);
 
+        Authentication authentication = getAuthenticatedUser();
+        boolean isAdmin = hasAdminRole(authentication);
+        if (!isAdmin && !Objects.equals(currentUser.getEmail(), updatedUser.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN,
+                    "Users cannot change their email through this operation");
+        }
+        if (updatedUser.getEmail() != null
+                && !updatedUser.getEmail().equals(currentUser.getEmail())
+                && isEmailExist(updatedUser.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email is already registered");
+        }
+
+        currentUser.setName(updatedUser.getName());
+        if (updatedUser.getPassword() != null && !updatedUser.getPassword().isBlank()) {
+            currentUser.setPassword(passwordEncoder.encode(updatedUser.getPassword()));
+        }
+        if (isAdmin) {
+            currentUser.setEmail(updatedUser.getEmail());
+        }
         return this.userRepository.save(currentUser);
     }
 
@@ -57,8 +81,45 @@ public class UserService {
         return this.userRepository.existsByEmail(email);
     }
 
-    public List<User> handleGetAllUsers(Pageable pageable) {
-        Page<User> pageUser = this.userRepository.findAll(pageable);
-        return pageUser.getContent();
+    private User findUserOrThrow(Long id) {
+        if (id == null) {
+            throw new IdInvalidException("ID người dùng không được để trống");
+        }
+        if (id <= 0) {
+            throw new IdInvalidException("ID người dùng phải lớn hơn 0");
+        }
+        return this.userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
+
+    private void assertOwnerOrAdmin(User user) {
+        Authentication authentication = getAuthenticatedUser();
+        String currentUserEmail = authentication.getName();
+        boolean isAdmin = hasAdminRole(authentication);
+        if (!isAdmin && !user.getEmail().equals(currentUserEmail)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You are not authorized to access this resource");
+        }
+    }
+
+    private Authentication getAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()
+                || (authentication instanceof AnonymousAuthenticationToken)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Authentication required");
+        }
+        return authentication;
+    }
+
+    private boolean hasAdminRole(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return false;
+        }
+        return authentication.getAuthorities().stream()
+                .anyMatch(grantedAuthority -> grantedAuthority.getAuthority().equals("ROLE_ADMIN"));
+    }
+
+    public List<User> handleGetAllUsers(Pageable pageable) {
+        return this.userRepository.findAll(pageable).getContent();
+    }
+
 }

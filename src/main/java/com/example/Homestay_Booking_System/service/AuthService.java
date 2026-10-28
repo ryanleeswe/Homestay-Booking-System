@@ -69,12 +69,8 @@ public class AuthService {
     }
 
     @Transactional
-    public void logout(String rawRefreshToken) {
-        if (rawRefreshToken == null || rawRefreshToken.isBlank()) {
-            return;
-        }
-        refreshTokenRepository.findByTokenHashForUpdate(hashToken(rawRefreshToken))
-                .ifPresent(token -> token.setRevoked(true));
+    public void logout(String userEmail) {
+        refreshTokenRepository.revokeAllByUserEmail(userEmail);
     }
 
     private TokenPair createTokenPair(User user) {

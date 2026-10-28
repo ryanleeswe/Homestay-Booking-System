@@ -1,6 +1,6 @@
 package com.example.Homestay_Booking_System.util;
 
-import com.example.Homestay_Booking_System.domain.dto.RestResponse;
+import com.example.Homestay_Booking_System.dto.response.RestResponse;
 import com.example.Homestay_Booking_System.util.annotation.ApiMessage;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpMethod;
@@ -23,7 +23,11 @@ public class ResponseBodyAdvice implements org.springframework.web.servlet.mvc.m
 
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-        return true;
+        // Only wrap responses returned by this application's REST controllers.
+        // Springdoc and framework handlers may return byte[]; wrapping those as
+        // RestResponse makes ByteArrayHttpMessageConverter throw ClassCastException.
+        return returnType.getContainingClass().getPackageName()
+                .startsWith("com.example.Homestay_Booking_System.controller");
     }
 
     @Override

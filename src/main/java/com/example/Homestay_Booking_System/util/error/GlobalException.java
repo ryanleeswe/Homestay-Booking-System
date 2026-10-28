@@ -1,7 +1,7 @@
 package com.example.Homestay_Booking_System.util.error;
 
 import java.util.stream.Collectors;
-import com.example.Homestay_Booking_System.domain.dto.RestResponse;
+import com.example.Homestay_Booking_System.dto.response.RestResponse;
 import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

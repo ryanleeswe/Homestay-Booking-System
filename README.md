@@ -1,52 +1,85 @@
+﻿# Homestay Booking System — Phase 1
 
-# Chạy Homestay Booking System bằng Docker
+REST API đặt homestay xây dựng bằng Java và Spring Boot.
 
-## Hai file chính
+## Phase 1 gồm những gì
 
-- `Dockerfile`: dùng Maven và Java 21 để build JAR, sau đó đóng gói backend
-  vào image Java runtime. Không cần cài Java/Maven trên máy để build bằng Docker.
-- `compose.yaml`: chạy backend và MySQL 8.4 cùng nhau, cấu hình kết nối,
-  ánh xạ cổng và volume lưu database. Backend đợi MySQL healthcheck thành công.
+- Tài khoản người dùng, đăng nhập và phân quyền `USER` / `ADMIN`.
+- Quản lý homestay, phòng và tiện nghi.
+- Tạo, cập nhật, hủy và theo dõi booking; kiểm tra ngày, sức chứa và trùng lịch.
+- Thanh toán được biểu diễn bằng trạng thái (`UNPAID`, `PAID`, `REFUNDED`);
+- Đánh giá booking đã hoàn tất; tối đa một review trên mỗi booking.
+- REST API, validation, phản hồi lỗi và tài liệu OpenAPI.
 
-Các file hỗ trợ: `.dockerignore` loại cấu hình cá nhân và mật khẩu khỏi build
-context; `.env.example` là mẫu biến môi trường. `.env` được Git bỏ qua.
+## Công nghệ và kiến trúc
 
-## 1. Chuẩn bị
+Java 21, Spring Boot 4.1.1, Spring MVC, Spring Data JPA/Hibernate, Spring Security OAuth2 Resource Server (JWT), Jakarta Validation, MySQL 8 và Maven Wrapper. H2 được dùng trong test.
 
-Cài và mở Docker Desktop, sử dụng Linux containers. Trong terminal tại thư mục
-dự án, kiểm tra:
+Luồng xử lý chính: HTTP → `controller` → request/response `dto` → `service` (nghiệp vụ) → `repository` → MySQL. `domain` chứa entity/enum; `config` cấu hình security, JWT, password và OpenAPI; `util` xử lý response và lỗi. DTO giúp API không phụ thuộc trực tiếp vào entity. Đặt logic nghiệp vụ trong service, truy vấn trong repository và kiểm tra đầu vào tại DTO/service.
 
-```powershell
-docker --version
-docker compose version
+Các entity chính: `User`, `Homestay`, `Room`, `Amenity`, `Booking`, `Review`, `RefreshToken`. Booking lưu snapshot giá mỗi đêm để tổng tiền không đổi khi giá phòng đổi sau đó. Booking có thể gắn phòng hoặc chỉ homestay; homestay có thể có trạng thái `PENDING`, `APPROVED`, `REJECTED`, `INACTIVE`. Xem entity và service trong `src/main/java/com/example/Homestay_Booking_System/` để biết quy tắc đang được triển khai.
+
+## Cấu trúc thư mục
+
+```text
+src/
+├── main/java/com/example/Homestay_Booking_System/
+│   ├── config/       # Security, JWT, password, OpenAPI
+│   ├── controller/   # REST endpoints, nhận request/trả response
+│   ├── domain/       # JPA entities và enum trạng thái
+│   ├── dto/
+│   │   ├── request/  # Payload đầu vào và validation
+│   │   └── response/ # Payload trả về client
+│   ├── repository/   # Truy vấn và persistence qua Spring Data JPA
+│   ├── service/      # Nghiệp vụ và điều phối thao tác dữ liệu
+│   └── util/         # Response chung, exception và annotation
+├── main/resources/   # application.properties, cấu hình ứng dụng
+└── test/java/        # Unit/integration tests
+postman/              # Postman collection để gọi thử API
+pom.xml               # Dependencies và cấu hình Maven/build
+mvnw, mvnw.cmd        # Maven Wrapper cho Linux/macOS và Windows
+target/               # Artifact build; không chỉnh sửa source tại đây
 ```
 
-Nếu chưa có `.env`, tạo từ mẫu:
+Khi thêm tính năng Phase 2, tạo DTO request/response và endpoint trong các package tương ứng; đặt quy tắc nghiệp vụ ở `service`, truy cập DB ở `repository`, và cập nhật `domain` nếu cần thêm dữ liệu/trạng thái. Bổ sung test trong `src/test` và cập nhật Postman/OpenAPI khi API thay đổi.
+## Clone và chạy local
+
+Yêu cầu: Git và Docker Desktop đang chạy Linux containers. Docker build backend bằng Java 21/Maven và chạy MySQL 8.4; không cần cài Java, Maven hoặc MySQL riêng trên máy.
+
+1. Clone repo và chuyển vào thư mục dự án:
 
 ```powershell
+git clone https://github.com/ryanleeswe/Homestay-Booking-System.git
+cd Homestay-Booking-System
+```
+
+Nếu cấu hình Docker chưa được merge vào `main`, chạy `git switch hoangd` để dùng nhánh có cấu hình này.
+
+2. Tạo `.env` từ mẫu:
+
+```powershell
+# Windows PowerShell
 Copy-Item .env.example .env
 ```
 
-Mở `.env`, thay `DOCKER_MYSQL_ROOT_PASSWORD` và `DOCKER_MYSQL_PASSWORD` bằng hai
-mật khẩu riêng cho database Docker. Dùng mật khẩu chữ/số để dễ cấu hình ban đầu.
-Đây không phải mật khẩu của MySQL Windows đang chạy ở cổng 3306.
+```bash
+# Linux/macOS
+cp .env.example .env
+```
 
-Tạo JWT secret ngẫu nhiên và ghi vào `.env` bằng PowerShell:
+Mở `.env`, thay `DOCKER_MYSQL_ROOT_PASSWORD` và `DOCKER_MYSQL_PASSWORD` bằng hai mật khẩu riêng cho database Docker. Điền `JWT_SECRET` là chuỗi Base64 của ít nhất 32 byte ngẫu nhiên. Tạo secret bằng PowerShell rồi sao chép kết quả vào `.env`:
 
 ```powershell
 $jwtBytes = New-Object byte[] 32
 $rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
 $rng.GetBytes($jwtBytes)
 $rng.Dispose()
-$jwtSecret = [Convert]::ToBase64String($jwtBytes)
-$envText = (Get-Content .env -Raw) -replace '(?m)^JWT_SECRET=.*$', "JWT_SECRET=$jwtSecret"
-Set-Content -LiteralPath .env -Value $envText -Encoding ascii
+[Convert]::ToBase64String($jwtBytes)
 ```
 
-Giữ secret này cho các lần chạy sau. Nếu terminal đã có biến `JWT_SECRET`, Compose
-sẽ ưu tiên biến của terminal hơn `.env`. Không commit `.env` lên Git.
+Giữ secret cho các lần chạy sau; không commit `.env`. Compose ưu tiên biến môi trường của terminal hơn giá trị cùng tên trong `.env`.
 
-## 2. Build và khởi động
+3. Build và khởi động tại thư mục dự án:
 
 ```powershell
 docker compose config --quiet
@@ -55,47 +88,46 @@ docker compose ps
 docker compose logs -f backend
 ```
 
-Lần đầu cần Internet để tải image và dependency Maven. Khi log có dòng
-`Started HomestayBookingSystemApplication`, backend đã khởi động.
-Nhấn Ctrl+C để thoát xem log; container vẫn chạy ở chế độ nền.
+Lần đầu cần Internet để tải image và dependency Maven. Khi log có `Started HomestayBookingSystemApplication`, backend đã sẵn sàng. Nhấn Ctrl+C để thoát xem log; container vẫn chạy nền. Dockerfile bỏ qua test khi build image.
 
-Image build bỏ qua test cần môi trường database. Chạy test riêng trước khi triển khai.
+API Docker mặc định tại `http://localhost:8081`; Swagger UI tại `http://localhost:8081/swagger-ui.html`, OpenAPI JSON tại `http://localhost:8081/v3/api-docs`. Khi dùng mục API bên dưới với Docker, thay cổng `8080` bằng `8081`.
 
-## 3. Thử trên Postman
+MySQL Docker truy cập từ máy tại `127.0.0.1:3307`, database `homestay_db`, username `homestay`, password là `DOCKER_MYSQL_PASSWORD`. Backend kết nối nội bộ tới `mysql:3306`. Database Docker tách biệt MySQL cài trên máy; dữ liệu cũ không tự chuyển sang. Đổi `BACKEND_PORT` hoặc `MYSQL_PORT` trong `.env` nếu cổng bị chiếm.
 
-Gọi `GET http://localhost:8081/` với Authorization = No Auth.
-Các API khác dùng cùng cổng 8081, ví dụ `POST /users`, `POST /auth/login`.
-Sau đăng nhập, dùng `data.accessToken` với Bearer Token cho API cần xác thực.
-
-| Thành phần | Địa chỉ truy cập từ máy bạn | Bên trong Docker |
-|---|---|---|
-| Backend | localhost:8081 | backend:8080 |
-| MySQL | 127.0.0.1:3307 | mysql:3306 |
-
-Backend kết nối MySQL bằng hostname `mysql`, không dùng `localhost` vì hai
-service chạy trong hai container khác nhau. Đổi `BACKEND_PORT` hoặc `MYSQL_PORT`
-trong `.env` nếu cổng trên máy đã bị chiếm, rồi chạy lại `docker compose up -d`.
-
-## 4. Xem database bằng Workbench
-
-Tạo kết nối TCP với host `127.0.0.1`, port `3307`, username `homestay`, password
-là giá trị `DOCKER_MYSQL_PASSWORD` trong `.env`, schema `homestay_db`.
-
-Database Docker tách biệt database MySQL Windows tại cổng 3306. Dữ liệu user cũ
-không tự chuyển sang Docker; tạo tài khoản thử mới qua API cổng 8081.
-
-## 5. Dừng và chạy lại
+4. Dừng hoặc chạy lại:
 
 ```powershell
 docker compose down
 docker compose up -d
+# Sau khi sửa code
+docker compose up -d --build
 ```
 
-`down` giữ nguyên volume database. Không thêm `-v` nếu cần giữ dữ liệu.
-Khi sửa code, dùng `docker compose up -d --build` để build lại backend.
-Đổi mật khẩu trong `.env` không tự đổi mật khẩu của database đã khởi tạo trong
-volume; cần đổi mật khẩu trong MySQL tương ứng trước khi dùng giá trị mới.
+`down` giữ volume database; không thêm `-v` nếu cần giữ dữ liệu. Đổi mật khẩu trong `.env` không tự đổi mật khẩu database đã khởi tạo; cần cập nhật mật khẩu tương ứng trong MySQL. Hibernate dùng `ddl-auto=update` để cập nhật schema khi khởi động trong môi trường phát triển.
 
-Cấu hình này phục vụ chạy thử local, các cổng chỉ mở trên máy bạn.
-Tham khảo thứ tự khởi động và healthcheck tại
-[Docker Compose documentation](https://docs.docker.com/compose/how-tos/startup-order/).
+## API và kiểm tra nhanh
+
+Các nhóm endpoint: `/auth` (login/refresh/logout), `/users`, `/homestays`, `/homestays/{homestayId}/rooms`, `/amenities`, `/homestays/{homestayId}/amenities`, `/bookings`, `/bookings/{bookingId}/review`. Một số thao tác yêu cầu đăng nhập hoặc role `ADMIN`; gửi access token bằng `Authorization: Bearer <access-token>`.
+
+- Swagger UI: `http://localhost:8080/swagger-ui.html`
+- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
+- Postman: [`postman/Homestay-Booking-System.postman_collection.json`](postman/Homestay-Booking-System.postman_collection.json)
+
+## Build và triển khai
+
+Tạo artifact có thể chạy trên máy/VM/container đã cài JDK 21 và truy cập MySQL:
+
+```powershell
+# Windows
+.\mvnw.cmd clean package
+java -jar target/Homestay-Booking-System-0.0.1-SNAPSHOT.jar
+```
+
+```bash
+# Linux/macOS
+./mvnw clean package
+java -jar target/Homestay-Booking-System-0.0.1-SNAPSHOT.jar
+```
+
+Khi triển khai, cấp `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET` qua secret/environment của nền tảng, mở cổng ứng dụng (mặc định 8080) và cấu hình MySQL truy cập được từ dịch vụ.
+

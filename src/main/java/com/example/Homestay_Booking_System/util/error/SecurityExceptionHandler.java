@@ -2,7 +2,7 @@ package com.example.Homestay_Booking_System.util.error;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import com.example.Homestay_Booking_System.domain.dto.RestResponse;
+import com.example.Homestay_Booking_System.dto.response.RestResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;
