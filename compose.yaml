@@ -10,7 +10,7 @@ services:
       MYSQL_PASSWORD: ${DOCKER_MYSQL_PASSWORD:?Set DOCKER_MYSQL_PASSWORD in .env}
       MYSQL_ROOT_PASSWORD: ${DOCKER_MYSQL_ROOT_PASSWORD:?Set DOCKER_MYSQL_ROOT_PASSWORD in .env}
     ports:
-      - "127.0.0.1:${MYSQL_PORT:-3307}:3306"
+      - "127.0.0.1:${MYSQL_PORT:-3306}:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
@@ -35,7 +35,7 @@ services:
       DB_PASSWORD: ${DOCKER_MYSQL_PASSWORD:?Set DOCKER_MYSQL_PASSWORD in .env}
       JWT_SECRET: ${JWT_SECRET:?Set a Base64 JWT_SECRET of at least 32 bytes in .env}
     ports:
-      - "127.0.0.1:${BACKEND_PORT:-8081}:8080"
+      - "127.0.0.1:${BACKEND_PORT:-8080}:8080"
 
 volumes:
   mysql_data:
