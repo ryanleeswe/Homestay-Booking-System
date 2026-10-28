@@ -1,4 +1,4 @@
-﻿# Homestay Booking System — Phase 1
+# Homestay Booking System — Phase 1
 
 REST API đặt homestay xây dựng bằng Java và Spring Boot.
 
@@ -177,9 +177,9 @@ docker compose logs -f backend
 
 Lần đầu cần Internet để tải image và dependency Maven. Khi log có `Started HomestayBookingSystemApplication`, backend đã sẵn sàng. Nhấn Ctrl+C để thoát xem log; container vẫn chạy nền. Dockerfile bỏ qua test khi build image.
 
-API Docker mặc định tại `http://localhost:8081`; Swagger UI tại `http://localhost:8081/swagger-ui.html`, OpenAPI JSON tại `http://localhost:8081/v3/api-docs`. Khi dùng mục API bên dưới với Docker, thay cổng `8080` bằng `8081`.
+API Docker mặc định tại `http://localhost:8080`; Swagger UI tại `http://localhost:8080/swagger-ui.html`, OpenAPI JSON tại `http://localhost:8080/v3/api-docs`.
 
-MySQL Docker truy cập từ máy tại `127.0.0.1:3307`, database `homestay_db`, username `homestay`, password là `DOCKER_MYSQL_PASSWORD`. Backend kết nối nội bộ tới `mysql:3306`. Database Docker tách biệt MySQL cài trên máy; dữ liệu cũ không tự chuyển sang. Đổi `BACKEND_PORT` hoặc `MYSQL_PORT` trong `.env` nếu cổng bị chiếm.
+MySQL Docker truy cập từ máy tại `127.0.0.1:3306`, database `homestay_db`, username `homestay`, password là `DOCKER_MYSQL_PASSWORD`. Backend kết nối nội bộ tới `mysql:3306`. Database Docker tách biệt MySQL cài trên máy; dữ liệu cũ không tự chuyển sang. Đổi `BACKEND_PORT` hoặc `MYSQL_PORT` trong `.env` nếu cổng bị chiếm.
 
 4. Dừng hoặc chạy lại:
 
