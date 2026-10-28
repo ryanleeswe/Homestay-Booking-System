@@ -140,8 +140,6 @@ git clone https://github.com/ryanleeswe/Homestay-Booking-System.git
 cd Homestay-Booking-System
 ```
 
-Nếu cấu hình Docker chưa được merge vào `main`, chạy `git switch hoangd` để dùng nhánh có cấu hình này.
-
 2. Tạo `.env` từ mẫu:
 
 ```powershell
