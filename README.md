@@ -23,78 +23,54 @@ Sơ đồ dưới đây mô tả các thành phần trong source hiện tại v�
 
 ```mermaid
 flowchart LR
-    Client["Client<br/>Postman / Web app"]
+    Client["Client: Postman / Web"]
 
-    subgraph Runtime["Homestay Booking System — Spring Boot"]
-        Security["Spring Security<br/>JWT Resource Server<br/>route + role checks"]
-
-        subgraph Web["HTTP / Presentation"]
-            Controllers["Controllers<br/>Auth · User · Homestay<br/>Room · Booking · Amenity · Review"]
-            RequestDTO["Request DTOs<br/>JSON mapping + validation"]
-            ResponseDTO["Response DTOs<br/>API payloads"]
-            Advice["ResponseBodyAdvice<br/>wrap successful responses"]
-            Errors["GlobalException<br/>+ SecurityExceptionHandler<br/>common error response"]
-        end
-
-        subgraph Business["Application / Business"]
-            Auth["AuthService<br/>login · refresh · logout"]
-            UserSvc["UserService"]
-            HomeSvc["HomestayService"]
-            BookingSvc["BookingService<br/>dates · capacity · availability<br/>price snapshot + status"]
-            RoomAPI["RoomController<br/>room operations"]
-            AmenityAPI["AmenityController<br/>amenity operations"]
-            ReviewAPI["ReviewController<br/>completed-booking review"]
-        end
-
-        subgraph Persistence["Persistence"]
-            Repositories["Spring Data JPA Repositories"]
-            Hibernate["Hibernate ORM"]
-        end
-
+    subgraph Backend["Spring Boot backend"]
+        Security["Spring Security<br/>JWT validation + route roles"]
+        Controllers["REST controllers<br/>Auth, User, Homestay, Room,<br/>Booking, Amenity, Review"]
+        RequestDTO["Request DTOs<br/>JSON + validation"]
+        ResponseDTO["Response DTOs"]
+        Services["Services<br/>Auth, User, Homestay, Booking"]
+        Repositories["Spring Data JPA repositories"]
+        JPA["Hibernate / JPA"]
+        Advice["ResponseBodyAdvice<br/>success envelope"]
+        GlobalError["GlobalException<br/>common error envelope"]
+        SecurityError["SecurityExceptionHandler<br/>401 / 403 bridge"]
+        Auth["AuthService + UserDetailsService<br/>BCrypt password check"]
         JWT["JWT encoder / decoder<br/>HS256"]
+
+        Security --> RequestDTO
+        RequestDTO --> Controllers
+        Controllers --> Services
+        Controllers --> ResponseDTO
+        ResponseDTO --> Advice
+        Controllers --> GlobalError
+        Security --> SecurityError
+        SecurityError --> GlobalError
+        Services --> Repositories
+        Controllers --> Repositories
+        Repositories --> JPA
+        Controllers --> Auth
+        Auth --> JWT
+        Security --> JWT
     end
 
-    subgraph Database["MySQL 8"]
-        Tables["users · refresh_tokens<br/>homestays · rooms · amenities<br/>bookings · reviews<br/>homestay_amenities"]
-    end
+    Database[("MySQL 8<br/>users, refresh_tokens,<br/>homestays, rooms, amenities,<br/>bookings, reviews")]
 
-    subgraph LocalRun["Local Docker Compose"]
-        Compose["backend container<br/>Java 21 · port 8080"]
-        MySQLContainer["mysql container<br/>port 3306"]
-        Volume[("mysql_data volume")]
-        Compose -. "starts after healthy" .-> MySQLContainer
-        MySQLContainer --- Volume
+    subgraph Compose["Docker Compose deployment"]
+        BackendContainer["backend container<br/>Java 21 : 8080"]
+        MySQLContainer["mysql container : 3306"]
+        DataVolume[("mysql_data volume")]
+        BackendContainer -->|JDBC: mysql:3306| MySQLContainer
+        MySQLContainer --> DataVolume
     end
 
     Client -->|HTTP / JSON| Security
-    Security --> Controllers
-    Controllers <--> RequestDTO
-    Controllers --> UserSvc
-    Controllers --> HomeSvc
-    Controllers --> BookingSvc
-    Controllers --> RoomAPI
-    Controllers --> AmenityAPI
-    Controllers --> ReviewAPI
-    Controllers --> Auth
-    UserSvc --> Repositories
-    HomeSvc --> Repositories
-    BookingSvc --> Repositories
-    RoomAPI --> Repositories
-    AmenityAPI --> Repositories
-    ReviewAPI --> Repositories
-    Auth --> Repositories
-    Auth <--> JWT
-    Security <--> JWT
-    Repositories --> Hibernate
-    Hibernate --> Tables
-    Controllers --> ResponseDTO
-    ResponseDTO --> Advice
-    Advice -->|success envelope| Client
-    Controllers -. "throws exception" .-> Errors
-    Security -. "401 / 403" .-> Errors
-    Errors -->|error envelope| Client
-    Compose -. "runs same Spring Boot app" .-> Runtime
-    MySQLContainer -. "JDBC: mysql:3306" .-> Hibernate
+    Advice -->|success response| Client
+    GlobalError -->|error response| Client
+    JPA --> Database
+    Backend --> BackendContainer
+    Database --- MySQLContainer
 ```
 
 Khi chạy bằng Docker, máy host gọi backend qua `localhost:8080` (hoặc cổng được đặt trong `.env`); backend kết nối database qua hostname `mysql:3306` trong mạng Compose. Khi chạy local không dùng Docker, backend thường kết nối MySQL host qua `localhost:3306`.
