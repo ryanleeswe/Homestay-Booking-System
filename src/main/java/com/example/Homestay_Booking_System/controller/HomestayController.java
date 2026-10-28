@@ -35,13 +35,13 @@ public class HomestayController {
     }
 
     @GetMapping
-    @Operation(summary = "Xem tất cả homestay")
+    @Operation(summary = "Xem tất cả homestay", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<List<HomestayResponse>> getAll() {
         return ResponseEntity.ok(homestayService.getAllHomestays().stream().map(HomestayResponse::from).toList());
     }
 
     @GetMapping("/available")
-    @Operation(summary = "Xem các homestay đang còn phòng")
+    @Operation(summary = "Xem các homestay đang còn phòng", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<List<HomestayResponse>> getAvailable() {
         return ResponseEntity.ok(homestayService.getAvailableHomestays().stream().map(HomestayResponse::from).toList());
     }
@@ -53,7 +53,7 @@ public class HomestayController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Xem chi tiết homestay")
+    @Operation(summary = "Xem chi tiết homestay", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<HomestayResponse> getById(@PathVariable Long id) {
         return homestayService.getHomestayById(id)
                 .map(HomestayResponse::from).map(ResponseEntity::ok)

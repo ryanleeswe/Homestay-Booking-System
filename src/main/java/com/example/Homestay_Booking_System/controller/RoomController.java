@@ -47,7 +47,7 @@ public class RoomController {
     }
 
     @GetMapping
-    @Operation(summary = "Xem danh sách phòng của homestay")
+    @Operation(summary = "Xem danh sách phòng của homestay", security = @SecurityRequirement(name = "bearerAuth"))
     public List<RoomResponse> list(@PathVariable Long homestayId) {
         if (!homestays.existsById(homestayId)) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Homestay not found");
         return rooms.findByHomestayId(homestayId).stream().map(RoomResponse::from).toList();

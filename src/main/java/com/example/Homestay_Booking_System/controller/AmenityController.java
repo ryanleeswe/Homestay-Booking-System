@@ -53,7 +53,7 @@ public class AmenityController {
     }
 
     @GetMapping("/homestays/{homestayId}/amenities")
-    @Operation(summary = "Xem các tiện ích của homestay")
+    @Operation(summary = "Xem các tiện ích của homestay", security = @SecurityRequirement(name = "bearerAuth"))
     public List<AmenityResponse> listForHomestay(@PathVariable Long homestayId) {
         Homestay homestay = homestays.findById(homestayId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Homestay not found"));

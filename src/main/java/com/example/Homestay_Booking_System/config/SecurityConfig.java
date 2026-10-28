@@ -43,12 +43,6 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/auth/logout").authenticated()
                         .requestMatchers(HttpMethod.POST, "/users").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        .requestMatchers(HttpMethod.GET,
-                                "/homestays",
-                                "/homestays/available",
-                                "/homestays/*",
-                                "/homestays/*/rooms",
-                                "/homestays/*/amenities").permitAll()
                         .requestMatchers("/admin", "/admin/**").hasRole("ADMIN")
                         .requestMatchers("/users", "/users/**").authenticated()
                         .anyRequest().authenticated())

@@ -17,6 +17,6 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
         type = SecuritySchemeType.HTTP,
         scheme = "bearer",
         bearerFormat = "JWT",
-        description = "Dán access token; không nhập tiền tố Bearer")
+        description = "Dán access token vào đây  ")
 public class OpenApiConfig {
-}
+} 
