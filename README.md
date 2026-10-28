@@ -17,6 +17,88 @@ Java 21, Spring Boot 4.1.1, Spring MVC, Spring Data JPA/Hibernate, Spring Securi
 
 Luồng xử lý chính: HTTP → `controller` → request/response `dto` → `service` (nghiệp vụ) → `repository` → MySQL. `domain` chứa entity/enum; `config` cấu hình security, JWT, password và OpenAPI; `util` xử lý response và lỗi. DTO giúp API không phụ thuộc trực tiếp vào entity. Đặt logic nghiệp vụ trong service, truy vấn trong repository và kiểm tra đầu vào tại DTO/service.
 
+### Sơ đồ kiến trúc
+
+Sơ đồ dưới đây mô tả các thành phần trong source hiện tại và cách request đi qua backend đến database. Các API nghiệp vụ trả DTO; `ResponseBodyAdvice` bọc response thành công, còn lỗi MVC và lỗi từ Security được chuẩn hóa qua `GlobalException`.
+
+```mermaid
+flowchart LR
+    Client["Client<br/>Postman / Web app"]
+
+    subgraph Runtime["Homestay Booking System — Spring Boot"]
+        Security["Spring Security<br/>JWT Resource Server<br/>route + role checks"]
+
+        subgraph Web["HTTP / Presentation"]
+            Controllers["Controllers<br/>Auth · User · Homestay<br/>Room · Booking · Amenity · Review"]
+            RequestDTO["Request DTOs<br/>JSON mapping + validation"]
+            ResponseDTO["Response DTOs<br/>API payloads"]
+            Advice["ResponseBodyAdvice<br/>wrap successful responses"]
+            Errors["GlobalException<br/>+ SecurityExceptionHandler<br/>common error response"]
+        end
+
+        subgraph Business["Application / Business"]
+            Auth["AuthService<br/>login · refresh · logout"]
+            UserSvc["UserService"]
+            HomeSvc["HomestayService"]
+            BookingSvc["BookingService<br/>dates · capacity · availability<br/>price snapshot + status"]
+            RoomAPI["RoomController<br/>room operations"]
+            AmenityAPI["AmenityController<br/>amenity operations"]
+            ReviewAPI["ReviewController<br/>completed-booking review"]
+        end
+
+        subgraph Persistence["Persistence"]
+            Repositories["Spring Data JPA Repositories"]
+            Hibernate["Hibernate ORM"]
+        end
+
+        JWT["JWT encoder / decoder<br/>HS256"]
+    end
+
+    subgraph Database["MySQL 8"]
+        Tables["users · refresh_tokens<br/>homestays · rooms · amenities<br/>bookings · reviews<br/>homestay_amenities"]
+    end
+
+    subgraph LocalRun["Local Docker Compose"]
+        Compose["backend container<br/>Java 21 · port 8080"]
+        MySQLContainer["mysql container<br/>port 3306"]
+        Volume[("mysql_data volume")]
+        Compose -. "starts after healthy" .-> MySQLContainer
+        MySQLContainer --- Volume
+    end
+
+    Client -->|HTTP / JSON| Security
+    Security --> Controllers
+    Controllers <--> RequestDTO
+    Controllers --> UserSvc
+    Controllers --> HomeSvc
+    Controllers --> BookingSvc
+    Controllers --> RoomAPI
+    Controllers --> AmenityAPI
+    Controllers --> ReviewAPI
+    Controllers --> Auth
+    UserSvc --> Repositories
+    HomeSvc --> Repositories
+    BookingSvc --> Repositories
+    RoomAPI --> Repositories
+    AmenityAPI --> Repositories
+    ReviewAPI --> Repositories
+    Auth --> Repositories
+    Auth <--> JWT
+    Security <--> JWT
+    Repositories --> Hibernate
+    Hibernate --> Tables
+    Controllers --> ResponseDTO
+    ResponseDTO --> Advice
+    Advice -->|success envelope| Client
+    Controllers -. "throws exception" .-> Errors
+    Security -. "401 / 403" .-> Errors
+    Errors -->|error envelope| Client
+    Compose -. "runs same Spring Boot app" .-> Runtime
+    MySQLContainer -. "JDBC: mysql:3306" .-> Hibernate
+```
+
+Khi chạy bằng Docker, máy host gọi backend qua `localhost:8080` (hoặc cổng được đặt trong `.env`); backend kết nối database qua hostname `mysql:3306` trong mạng Compose. Khi chạy local không dùng Docker, backend thường kết nối MySQL host qua `localhost:3306`.
+
 Các entity chính: `User`, `Homestay`, `Room`, `Amenity`, `Booking`, `Review`, `RefreshToken`. Booking lưu snapshot giá mỗi đêm để tổng tiền không đổi khi giá phòng đổi sau đó. Booking có thể gắn phòng hoặc chỉ homestay; homestay có thể có trạng thái `PENDING`, `APPROVED`, `REJECTED`, `INACTIVE`. Xem entity và service trong `src/main/java/com/example/Homestay_Booking_System/` để biết quy tắc đang được triển khai.
 
 ## Cấu trúc thư mục
