@@ -44,6 +44,35 @@ target/               # Artifact build; không chỉnh sửa source tại đây
 Khi thêm tính năng Phase 2, tạo DTO request/response và endpoint trong các package tương ứng; đặt quy tắc nghiệp vụ ở `service`, truy cập DB ở `repository`, và cập nhật `domain` nếu cần thêm dữ liệu/trạng thái. Bổ sung test trong `src/test` và cập nhật Postman/OpenAPI khi API thay đổi.
 ## Clone và chạy local
 
+Yêu cầu: Git, JDK 21 và MySQL 8. Không cần cài riêng maven vì repo có Maven Wrapper.
+
+1. Clone repo và chuyển vào thư mục dự án.
+2. Tạo database `homestay_db` (hoặc đổi `DB_URL`).
+3. Thiết lập biến môi trường. Ví dụ trên PowerShell:
+
+```powershell
+$env:DB_URL = "jdbc:mysql://localhost:3306/homestay_db?createDatabaseIfNotExist=true&serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true"
+$env:DB_USERNAME = "root"
+$env:DB_PASSWORD = "<mat-khau-mysql>"
+$env:JWT_SECRET = "<chuoi-bi-mat-base64-dai-va-ngau-nhien>"
+```
+
+`DB_URL` mặc định đã trỏ tới MySQL local. `DB_PASSWORD` và `JWT_SECRET` là bắt buộc; không commit secret. Có thể dùng `application-local.properties` cho cấu hình máy cá nhân; file này đã được bỏ qua trong Git.
+
+Chạy ứng dụng:
+
+```powershell
+# Windows
+.\mvnw.cmd spring-boot:run
+
+# Linux/macOS
+./mvnw spring-boot:run
+```
+
+Mặc định API chạy tại `http://localhost:8080`. Hibernate đang đặt `ddl-auto=update`, nên khi khởi động sẽ tự cập nhật schema cho môi trường phát triển.
+
+## Chạy bằng Docker
+
 Yêu cầu: Git và Docker Desktop đang chạy Linux containers. Docker build backend bằng Java 21/Maven và chạy MySQL 8.4; không cần cài Java, Maven hoặc MySQL riêng trên máy.
 
 1. Clone repo và chuyển vào thư mục dự án:
