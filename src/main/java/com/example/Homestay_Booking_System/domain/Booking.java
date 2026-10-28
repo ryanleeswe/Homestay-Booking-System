@@ -15,6 +15,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -57,6 +58,11 @@ public class Booking {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal totalPrice;
 
+    @DecimalMin(value = "0.0", inclusive = false)
+    @Column(precision = 10, scale = 2)
+    private BigDecimal nightlyPrice;
+
+    @Min(1)
     @Column(nullable = false)
     private int numGuests = 1;
 
@@ -82,7 +88,9 @@ public class Booking {
     public BigDecimal calculateTotal() {
         if (checkInDate == null || checkOutDate == null) return BigDecimal.ZERO;
         long nights = java.time.temporal.ChronoUnit.DAYS.between(checkInDate, checkOutDate);
-        BigDecimal nightlyRate = room != null ? room.getPricePerNight() : homestay.getPrice();
+        BigDecimal nightlyRate = nightlyPrice != null
+                ? nightlyPrice
+                : room != null ? room.getPricePerNight() : homestay.getPrice();
         return nightlyRate.multiply(BigDecimal.valueOf(nights));
     }
 

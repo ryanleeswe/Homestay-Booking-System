@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.Homestay_Booking_System.domain.Homestay;
+import com.example.Homestay_Booking_System.domain.HomestayStatus;
 import com.example.Homestay_Booking_System.dto.request.HomestayRequest;
 import com.example.Homestay_Booking_System.dto.response.HomestayResponse;
 import com.example.Homestay_Booking_System.service.HomestayService;
@@ -92,7 +93,10 @@ public class HomestayController {
         homestay.setDescription(request.description());
         homestay.setPrice(request.price());
         homestay.setNumberOfGuests(request.numberOfGuests());
-        homestay.setAvailable(request.available());
+        homestay.setStatus(request.status() != null
+                ? request.status()
+                : request.available() == null || request.available()
+                        ? HomestayStatus.APPROVED : HomestayStatus.INACTIVE);
         return homestay;
     }
 }

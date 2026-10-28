@@ -1,0 +1,14 @@
+.git
+.idea
+.vscode
+.codex
+.agents
+.aws
+target
+**/target
+.env
+.env.*
+**/application-local.properties
+**/application-local.yml
+**/application-local.yaml
+*.log
