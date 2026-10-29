@@ -1,4 +1,3 @@
-package com.example.Homestay_Booking_System.Config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
