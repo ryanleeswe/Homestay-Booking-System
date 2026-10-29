@@ -1,0 +1,41 @@
+name: homestay-booking
+
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: homestay_db
+      MYSQL_USER: homestay
+      MYSQL_PASSWORD: ${DOCKER_MYSQL_PASSWORD:?Set DOCKER_MYSQL_PASSWORD in .env}
+      MYSQL_ROOT_PASSWORD: ${DOCKER_MYSQL_ROOT_PASSWORD:?Set DOCKER_MYSQL_ROOT_PASSWORD in .env}
+    ports:
+      - "127.0.0.1:${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=\"$$MYSQL_PASSWORD\" mysql --protocol=TCP -h 127.0.0.1 -u\"$$MYSQL_USER\" -D\"$$MYSQL_DATABASE\" -e 'SELECT 1' >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SERVER_PORT: "8080"
+      DB_URL: "jdbc:mysql://mysql:3306/homestay_db?serverTimezone=Asia/Ho_Chi_Minh&allowPublicKeyRetrieval=true&useSSL=false"
+      DB_USERNAME: homestay
+      DB_PASSWORD: ${DOCKER_MYSQL_PASSWORD:?Set DOCKER_MYSQL_PASSWORD in .env}
+      JWT_SECRET: ${JWT_SECRET:?Set a Base64 JWT_SECRET of at least 32 bytes in .env}
+    ports:
+      - "127.0.0.1:${BACKEND_PORT:-8080}:8080"
+
+volumes:
+  mysql_data:

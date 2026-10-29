@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.security.core.Authentication;
 import com.example.Homestay_Booking_System.domain.Booking;
 import com.example.Homestay_Booking_System.domain.BookingStatus;
 import com.example.Homestay_Booking_System.domain.Review;
@@ -17,9 +18,14 @@ import com.example.Homestay_Booking_System.dto.response.ReviewResponse;
 import com.example.Homestay_Booking_System.repository.BookingRepository;
 import com.example.Homestay_Booking_System.repository.ReviewRepository;
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/bookings/{bookingId}/review")
+@Tag(name = "Reviews", description = "Tạo và xem đánh giá đặt phòng")
+@SecurityRequirement(name = "bearerAuth")
 public class ReviewController {
     private final BookingRepository bookings;
     private final ReviewRepository reviews;
@@ -30,9 +36,13 @@ public class ReviewController {
     }
 
     @PostMapping
-    public ResponseEntity<ReviewResponse> create(@PathVariable Long bookingId, @Valid @RequestBody ReviewRequest request) {
+    @Operation(summary = "Tạo đánh giá cho lượt đặt phòng đã hoàn thành")
+    public ResponseEntity<ReviewResponse> create(@PathVariable Long bookingId, @Valid @RequestBody ReviewRequest request,
+            Authentication authentication) {
         Booking booking = bookings.findById(bookingId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Booking not found"));
+        if (!booking.getUser().getEmail().equals(authentication.getName()))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the booking owner can submit a review");
         if (booking.getStatus() != BookingStatus.COMPLETED)
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Only completed bookings can be reviewed");
         if (reviews.existsByBookingId(bookingId))
@@ -46,6 +56,7 @@ public class ReviewController {
     }
 
     @GetMapping
+    @Operation(summary = "Xem đánh giá của lượt đặt phòng")
     public ReviewResponse get(@PathVariable Long bookingId) {
         return ReviewResponse.from(reviews.findByBookingId(bookingId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found")));

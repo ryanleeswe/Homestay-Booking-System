@@ -17,9 +17,13 @@ import com.example.Homestay_Booking_System.dto.response.RoomResponse;
 import com.example.Homestay_Booking_System.repository.HomestayRepository;
 import com.example.Homestay_Booking_System.repository.RoomRepository;
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/homestays/{homestayId}/rooms")
+@Tag(name = "Rooms", description = "Quản lý phòng trong homestay")
 public class RoomController {
     private final RoomRepository rooms;
     private final HomestayRepository homestays;
@@ -30,6 +34,7 @@ public class RoomController {
     }
 
     @PostMapping
+    @Operation(summary = "Tạo phòng", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<RoomResponse> create(@PathVariable Long homestayId, @Valid @RequestBody RoomRequest request) {
         Homestay homestay = homestays.findById(homestayId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Homestay not found"));
@@ -42,6 +47,7 @@ public class RoomController {
     }
 
     @GetMapping
+    @Operation(summary = "Xem danh sách phòng của homestay", security = @SecurityRequirement(name = "bearerAuth"))
     public List<RoomResponse> list(@PathVariable Long homestayId) {
         if (!homestays.existsById(homestayId)) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Homestay not found");
         return rooms.findByHomestayId(homestayId).stream().map(RoomResponse::from).toList();

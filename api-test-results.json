@@ -1,0 +1,866 @@
+[
+  {
+    "Case": "Health",
+    "Method": "GET",
+    "Path": "/",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Thành công"
+  },
+  {
+    "Case": "OpenAPI",
+    "Method": "GET",
+    "Path": "/v3/api-docs",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": null
+  },
+  {
+    "Case": "Swagger",
+    "Method": "GET",
+    "Path": "/swagger-ui/index.html",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": null
+  },
+  {
+    "Case": "Users anonymous",
+    "Method": "GET",
+    "Path": "/users",
+    "Expected": "401",
+    "Actual": 401,
+    "Pass": true,
+    "Message": "Thông tin xác thực không hợp lệ hoặc đã hết hạn"
+  },
+  {
+    "Case": "Invalid token",
+    "Method": "GET",
+    "Path": "/users",
+    "Expected": "401",
+    "Actual": 401,
+    "Pass": true,
+    "Message": "Thông tin xác thực không hợp lệ hoặc đã hết hạn"
+  },
+  {
+    "Case": "Register",
+    "Method": "POST",
+    "Path": "/users",
+    "Expected": "201",
+    "Actual": 201,
+    "Pass": true,
+    "Message": "Create a new user"
+  },
+  {
+    "Case": "Duplicate email",
+    "Method": "POST",
+    "Path": "/users",
+    "Expected": "409",
+    "Actual": 409,
+    "Pass": true,
+    "Message": "Email is already registered"
+  },
+  {
+    "Case": "Invalid email",
+    "Method": "POST",
+    "Path": "/users",
+    "Expected": "400",
+    "Actual": 400,
+    "Pass": true,
+    "Message": "email: Email must be valid"
+  },
+  {
+    "Case": "Missing password",
+    "Method": "POST",
+    "Path": "/users",
+    "Expected": "400",
+    "Actual": 400,
+    "Pass": true,
+    "Message": "password: Password is required"
+  },
+  {
+    "Case": "Wrong password",
+    "Method": "POST",
+    "Path": "/auth/login",
+    "Expected": "401",
+    "Actual": 401,
+    "Pass": true,
+    "Message": "Thông tin xác thực không hợp lệ hoặc đã hết hạn"
+  },
+  {
+    "Case": "Invalid login body",
+    "Method": "POST",
+    "Path": "/auth/login",
+    "Expected": "400",
+    "Actual": 400,
+    "Pass": true,
+    "Message": "email: must not be blank; password: must not be blank"
+  },
+  {
+    "Case": "Login",
+    "Method": "POST",
+    "Path": "/auth/login",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Đăng nhập thành công"
+  },
+  {
+    "Case": "Users list",
+    "Method": "GET",
+    "Path": "/users",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Get all users with pagination"
+  },
+  {
+    "Case": "Pagination",
+    "Method": "GET",
+    "Path": "/users?current=1&pageSize=1",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Get all users with pagination"
+  },
+  {
+    "Case": "Invalid pagination",
+    "Method": "GET",
+    "Path": "/users?current=0&pageSize=0",
+    "Expected": "400",
+    "Actual": 400,
+    "Pass": true,
+    "Message": "Validation failure"
+  },
+  {
+    "Case": "Own profile",
+    "Method": "GET",
+    "Path": "/users/6",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Get user by ID"
+  },
+  {
+    "Case": "Missing user",
+    "Method": "GET",
+    "Path": "/users/999999999",
+    "Expected": "404",
+    "Actual": 404,
+    "Pass": true,
+    "Message": "User not found"
+  },
+  {
+    "Case": "Invalid user ID",
+    "Method": "GET",
+    "Path": "/users/0",
+    "Expected": "400",
+    "Actual": 400,
+    "Pass": true,
+    "Message": "ID người dùng phải lớn hơn 0"
+  },
+  {
+    "Case": "USER cannot admin",
+    "Method": "GET",
+    "Path": "/admin",
+    "Expected": "403",
+    "Actual": 403,
+    "Pass": true,
+    "Message": "Bạn không có quyền thực hiện thao tác này"
+  },
+  {
+    "Case": "Update own name",
+    "Method": "PUT",
+    "Path": "/users",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Update an existing user"
+  },
+  {
+    "Case": "Cannot change own email",
+    "Method": "PUT",
+    "Path": "/users",
+    "Expected": "403",
+    "Actual": 403,
+    "Pass": true,
+    "Message": "Users cannot change their email through this operation"
+  },
+  {
+    "Case": "Second disposable user",
+    "Method": "POST",
+    "Path": "/users",
+    "Expected": "201",
+    "Actual": 201,
+    "Pass": true,
+    "Message": "Create a new user"
+  },
+  {
+    "Case": "Cannot read other profile",
+    "Method": "GET",
+    "Path": "/users/7",
+    "Expected": "403",
+    "Actual": 403,
+    "Pass": true,
+    "Message": "You are not authorized to access this resource"
+  },
+  {
+    "Case": "Cannot update other profile",
+    "Method": "PUT",
+    "Path": "/users",
+    "Expected": "403",
+    "Actual": 403,
+    "Pass": true,
+    "Message": "You are not authorized to access this resource"
+  },
+  {
+    "Case": "Create homestay",
+    "Method": "POST",
+    "Path": "/homestays",
+    "Expected": "201",
+    "Actual": 201,
+    "Pass": true,
+    "Message": "Thành công"
+  },
+  {
+    "Case": "List homestays anonymous blocked",
+    "Method": "GET",
+    "Path": "/homestays",
+    "Expected": "401",
+    "Actual": 401,
+    "Pass": true,
+    "Message": "Thông tin xác thực không hợp lệ hoặc đã hết hạn"
+  },
+  {
+    "Case": "Available anonymous blocked",
+    "Method": "GET",
+    "Path": "/homestays/available",
+    "Expected": "401",
+    "Actual": 401,
+    "Pass": true,
+    "Message": "Thông tin xác thực không hợp lệ hoặc đã hết hạn"
+  },
+  {
+    "Case": "Homestay detail public",
+    "Method": "GET",
+    "Path": "/homestays/2",
+    "Expected": "401",
+    "Actual": 401,
+    "Pass": true,
+    "Message": "Thông tin xác thực không hợp lệ hoặc đã hết hạn"
+  },
+  {
+    "Case": "List homestays authenticated",
+    "Method": "GET",
+    "Path": "/homestays",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Thành công"
+  },
+  {
+    "Case": "Available authenticated",
+    "Method": "GET",
+    "Path": "/homestays/available",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Thành công"
+  },
+  {
+    "Case": "Detail authenticated",
+    "Method": "GET",
+    "Path": "/homestays/2",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Thành công"
+  },
+  {
+    "Case": "Owner list",
+    "Method": "GET",
+    "Path": "/homestays/owner/6",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Thành công"
+  },
+  {
+    "Case": "Missing homestay authenticated",
+    "Method": "GET",
+    "Path": "/homestays/999999999",
+    "Expected": "404",
+    "Actual": 404,
+    "Pass": true,
+    "Message": null
+  },
+  {
+    "Case": "Update homestay",
+    "Method": "PUT",
+    "Path": "/homestays/2",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Thành công"
+  },
+  {
+    "Case": "Negative price",
+    "Method": "POST",
+    "Path": "/homestays",
+    "Expected": "400",
+    "Actual": 400,
+    "Pass": true,
+    "Message": "price: must be greater than 0.0"
+  },
+  {
+    "Case": "Blank name",
+    "Method": "POST",
+    "Path": "/homestays",
+    "Expected": "400",
+    "Actual": 400,
+    "Pass": true,
+    "Message": "name: must not be blank"
+  },
+  {
+    "Case": "Create homestay anonymous",
+    "Method": "POST",
+    "Path": "/homestays",
+    "Expected": "401",
+    "Actual": 401,
+    "Pass": true,
+    "Message": "Thông tin xác thực không hợp lệ hoặc đã hết hạn"
+  },
+  {
+    "Case": "Create room",
+    "Method": "POST",
+    "Path": "/homestays/2/rooms",
+    "Expected": "201",
+    "Actual": 201,
+    "Pass": true,
+    "Message": "Thành công"
+  },
+  {
+    "Case": "List rooms public",
+    "Method": "GET",
+    "Path": "/homestays/2/rooms",
+    "Expected": "401",
+    "Actual": 401,
+    "Pass": true,
+    "Message": "Thông tin xác thực không hợp lệ hoặc đã hết hạn"
+  },
+  {
+    "Case": "Rooms authenticated",
+    "Method": "GET",
+    "Path": "/homestays/2/rooms",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Thành công"
+  },
+  {
+    "Case": "Invalid room capacity",
+    "Method": "POST",
+    "Path": "/homestays/2/rooms",
+    "Expected": "400",
+    "Actual": 400,
+    "Pass": true,
+    "Message": "maxGuests: must be greater than or equal to 1"
+  },
+  {
+    "Case": "Room missing parent",
+    "Method": "POST",
+    "Path": "/homestays/999999999/rooms",
+    "Expected": "404",
+    "Actual": 404,
+    "Pass": true,
+    "Message": "Homestay not found"
+  },
+  {
+    "Case": "Create amenity",
+    "Method": "POST",
+    "Path": "/amenities",
+    "Expected": "201",
+    "Actual": 201,
+    "Pass": true,
+    "Message": "Thành công"
+  },
+  {
+    "Case": "Blank amenity",
+    "Method": "POST",
+    "Path": "/amenities",
+    "Expected": "400",
+    "Actual": 400,
+    "Pass": true,
+    "Message": "name: must not be blank"
+  },
+  {
+    "Case": "Attach amenity",
+    "Method": "POST",
+    "Path": "/homestays/2/amenities/2",
+    "Expected": "204",
+    "Actual": 204,
+    "Pass": true,
+    "Message": null
+  },
+  {
+    "Case": "Repeat attach",
+    "Method": "POST",
+    "Path": "/homestays/2/amenities/2",
+    "Expected": "204",
+    "Actual": 204,
+    "Pass": true,
+    "Message": null
+  },
+  {
+    "Case": "List amenities public",
+    "Method": "GET",
+    "Path": "/homestays/2/amenities",
+    "Expected": "401",
+    "Actual": 401,
+    "Pass": true,
+    "Message": "Thông tin xác thực không hợp lệ hoặc đã hết hạn"
+  },
+  {
+    "Case": "Amenities authenticated",
+    "Method": "GET",
+    "Path": "/homestays/2/amenities",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Thành công"
+  },
+  {
+    "Case": "Attach missing amenity",
+    "Method": "POST",
+    "Path": "/homestays/2/amenities/999999999",
+    "Expected": "404",
+    "Actual": 404,
+    "Pass": true,
+    "Message": "Amenity not found"
+  },
+  {
+    "Case": "Create booking",
+    "Method": "POST",
+    "Path": "/bookings",
+    "Expected": "201",
+    "Actual": 201,
+    "Pass": true,
+    "Message": "Thành công"
+  },
+  {
+    "Case": "List bookings",
+    "Method": "GET",
+    "Path": "/bookings",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Thành công"
+  },
+  {
+    "Case": "Booking detail",
+    "Method": "GET",
+    "Path": "/bookings/2",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Thành công"
+  },
+  {
+    "Case": "Bookings by user",
+    "Method": "GET",
+    "Path": "/bookings/user/6",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Thành công"
+  },
+  {
+    "Case": "Bookings by homestay",
+    "Method": "GET",
+    "Path": "/bookings/homestay/2",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Thành công"
+  },
+  {
+    "Case": "Missing booking",
+    "Method": "GET",
+    "Path": "/bookings/999999999",
+    "Expected": "404",
+    "Actual": 404,
+    "Pass": true,
+    "Message": "Booking not found"
+  },
+  {
+    "Case": "Overlap booking",
+    "Method": "POST",
+    "Path": "/bookings",
+    "Expected": "409",
+    "Actual": 409,
+    "Pass": true,
+    "Message": "Homestay is already booked for those dates"
+  },
+  {
+    "Case": "Over capacity",
+    "Method": "POST",
+    "Path": "/bookings",
+    "Expected": "400",
+    "Actual": 201,
+    "Pass": false,
+    "Message": "Thành công"
+  },
+  {
+    "Case": "Zero guests",
+    "Method": "POST",
+    "Path": "/bookings",
+    "Expected": "400",
+    "Actual": 400,
+    "Pass": true,
+    "Message": "numGuests: must be greater than or equal to 1"
+  },
+  {
+    "Case": "Invalid dates",
+    "Method": "POST",
+    "Path": "/bookings",
+    "Expected": "400",
+    "Actual": 400,
+    "Pass": true,
+    "Message": "Check-in must be in the future and check-out after check-in"
+  },
+  {
+    "Case": "Update pending booking",
+    "Method": "PUT",
+    "Path": "/bookings/2",
+    "Expected": "200",
+    "Actual": 409,
+    "Pass": false,
+    "Message": "Homestay is already booked for those dates"
+  },
+  {
+    "Case": "Review before completion",
+    "Method": "POST",
+    "Path": "/bookings/2/review",
+    "Expected": "409",
+    "Actual": 409,
+    "Pass": true,
+    "Message": "Only completed bookings can be reviewed"
+  },
+  {
+    "Case": "Review not yet exists",
+    "Method": "GET",
+    "Path": "/bookings/2/review",
+    "Expected": "404",
+    "Actual": 404,
+    "Pass": true,
+    "Message": "Review not found"
+  },
+  {
+    "Case": "Cannot complete pending",
+    "Method": "PUT",
+    "Path": "/bookings/2/status",
+    "Expected": "409",
+    "Actual": 409,
+    "Pass": true,
+    "Message": "Only confirmed bookings can be completed"
+  },
+  {
+    "Case": "Invalid status enum",
+    "Method": "PUT",
+    "Path": "/bookings/2/status",
+    "Expected": "400",
+    "Actual": 400,
+    "Pass": true,
+    "Message": "Nội dung yêu cầu bị thiếu hoặc sai định dạng JSON"
+  },
+  {
+    "Case": "Confirm booking",
+    "Method": "PUT",
+    "Path": "/bookings/2/status",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Thành công"
+  },
+  {
+    "Case": "Cannot edit confirmed",
+    "Method": "PUT",
+    "Path": "/bookings/2",
+    "Expected": "409",
+    "Actual": 409,
+    "Pass": true,
+    "Message": "Only pending bookings can be edited"
+  },
+  {
+    "Case": "Complete booking",
+    "Method": "PUT",
+    "Path": "/bookings/2/status",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Thành công"
+  },
+  {
+    "Case": "Cannot change finalized",
+    "Method": "PUT",
+    "Path": "/bookings/2/status",
+    "Expected": "409",
+    "Actual": 409,
+    "Pass": true,
+    "Message": "Booking is already finalized"
+  },
+  {
+    "Case": "Invalid review rating",
+    "Method": "POST",
+    "Path": "/bookings/2/review",
+    "Expected": "400",
+    "Actual": 400,
+    "Pass": true,
+    "Message": "rating: must be less than or equal to 5"
+  },
+  {
+    "Case": "Create review",
+    "Method": "POST",
+    "Path": "/bookings/2/review",
+    "Expected": "201",
+    "Actual": 201,
+    "Pass": true,
+    "Message": "Thành công"
+  },
+  {
+    "Case": "Read review",
+    "Method": "GET",
+    "Path": "/bookings/2/review",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Thành công"
+  },
+  {
+    "Case": "Duplicate review",
+    "Method": "POST",
+    "Path": "/bookings/2/review",
+    "Expected": "409",
+    "Actual": 409,
+    "Pass": true,
+    "Message": "Booking already has a review"
+  },
+  {
+    "Case": "Delete homestay with booking blocked",
+    "Method": "DELETE",
+    "Path": "/homestays/2",
+    "Expected": "409",
+    "Actual": 409,
+    "Pass": true,
+    "Message": "Homestay has bookings and cannot be deleted"
+  },
+  {
+    "Case": "Delete test booking",
+    "Method": "DELETE",
+    "Path": "/bookings/2",
+    "Expected": "204",
+    "Actual": 204,
+    "Pass": true,
+    "Message": null
+  },
+  {
+    "Case": "Delete missing booking",
+    "Method": "DELETE",
+    "Path": "/bookings/2",
+    "Expected": "404",
+    "Actual": 404,
+    "Pass": true,
+    "Message": null
+  },
+  {
+    "Case": "Delete test homestay",
+    "Method": "DELETE",
+    "Path": "/homestays/2",
+    "Expected": "200",
+    "Actual": 409,
+    "Pass": false,
+    "Message": "Homestay has bookings and cannot be deleted"
+  },
+  {
+    "Case": "Deleted homestay unavailable",
+    "Method": "GET",
+    "Path": "/homestays/2",
+    "Expected": "404",
+    "Actual": 200,
+    "Pass": false,
+    "Message": "Thành công"
+  },
+  {
+    "Case": "Invalid refresh",
+    "Method": "POST",
+    "Path": "/auth/refresh",
+    "Expected": "401",
+    "Actual": 401,
+    "Pass": true,
+    "Message": "Invalid refresh token"
+  },
+  {
+    "Case": "Refresh valid",
+    "Method": "POST",
+    "Path": "/auth/refresh",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Làm mới token thành công"
+  },
+  {
+    "Case": "Refresh replay blocked",
+    "Method": "POST",
+    "Path": "/auth/refresh",
+    "Expected": "401",
+    "Actual": 401,
+    "Pass": true,
+    "Message": "Invalid refresh token"
+  },
+  {
+    "Case": "Logout",
+    "Method": "POST",
+    "Path": "/auth/logout",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Đăng xuất thành công"
+  },
+  {
+    "Case": "Refresh after logout",
+    "Method": "POST",
+    "Path": "/auth/refresh",
+    "Expected": "401",
+    "Actual": 401,
+    "Pass": true,
+    "Message": "Invalid refresh token"
+  },
+  {
+    "Case": "Other login for cleanup",
+    "Method": "POST",
+    "Path": "/auth/login",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Đăng nhập thành công"
+  },
+  {
+    "Case": "Delete own disposable account",
+    "Method": "DELETE",
+    "Path": "/users/7",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Delete a user by ID"
+  },
+  {
+    "Case": "Delete missing account",
+    "Method": "DELETE",
+    "Path": "/users/999999999",
+    "Expected": "404",
+    "Actual": 404,
+    "Pass": true,
+    "Message": "User not found"
+  },
+  {
+    "Case": "Follow-up login",
+    "Method": "POST",
+    "Path": "/auth/login",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Đăng nhập thành công"
+  },
+  {
+    "Case": "Find own QA user",
+    "Method": "GET",
+    "Path": "/users?pageSize=100",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Get all users with pagination"
+  },
+  {
+    "Case": "Find remaining QA homestay",
+    "Method": "GET",
+    "Path": "/homestays/owner/6",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Thành công"
+  },
+  {
+    "Case": "Inspect test room capacity",
+    "Method": "GET",
+    "Path": "/homestays/2/rooms",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Thành công"
+  },
+  {
+    "Case": "Inspect excess booking",
+    "Method": "GET",
+    "Path": "/bookings/homestay/2",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Thành công"
+  },
+  {
+    "Case": "Pending update isolated",
+    "Method": "PUT",
+    "Path": "/bookings/3",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Thành công"
+  },
+  {
+    "Case": "Cancel booking",
+    "Method": "PUT",
+    "Path": "/bookings/3/status",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Thành công"
+  },
+  {
+    "Case": "Cancelled cannot confirm",
+    "Method": "PUT",
+    "Path": "/bookings/3/status",
+    "Expected": "409",
+    "Actual": 409,
+    "Pass": true,
+    "Message": "Booking is already finalized"
+  },
+  {
+    "Case": "Delete excess test booking",
+    "Method": "DELETE",
+    "Path": "/bookings/3",
+    "Expected": "204",
+    "Actual": 204,
+    "Pass": true,
+    "Message": null
+  },
+  {
+    "Case": "Delete QA homestay after cleanup",
+    "Method": "DELETE",
+    "Path": "/homestays/2",
+    "Expected": "200",
+    "Actual": 200,
+    "Pass": true,
+    "Message": "Thành công"
+  },
+  {
+    "Case": "Verify QA homestay deleted",
+    "Method": "GET",
+    "Path": "/homestays/2",
+    "Expected": "404",
+    "Actual": 404,
+    "Pass": true,
+    "Message": null
+  }
+]

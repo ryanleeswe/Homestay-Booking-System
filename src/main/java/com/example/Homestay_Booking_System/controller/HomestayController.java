@@ -14,14 +14,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.Homestay_Booking_System.domain.Homestay;
+import com.example.Homestay_Booking_System.domain.HomestayStatus;
 import com.example.Homestay_Booking_System.dto.request.HomestayRequest;
 import com.example.Homestay_Booking_System.dto.response.HomestayResponse;
 import com.example.Homestay_Booking_System.service.HomestayService;
 
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
 @RequestMapping("/homestays")
+@Tag(name = "Homestays", description = "Tìm kiếm và quản lý homestay")
 public class HomestayController {
 
     private final HomestayService homestayService;
@@ -31,21 +36,25 @@ public class HomestayController {
     }
 
     @GetMapping
+    @Operation(summary = "Xem tất cả homestay", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<List<HomestayResponse>> getAll() {
         return ResponseEntity.ok(homestayService.getAllHomestays().stream().map(HomestayResponse::from).toList());
     }
 
     @GetMapping("/available")
+    @Operation(summary = "Xem các homestay đang còn phòng", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<List<HomestayResponse>> getAvailable() {
         return ResponseEntity.ok(homestayService.getAvailableHomestays().stream().map(HomestayResponse::from).toList());
     }
 
     @GetMapping("/owner/{ownerId}")
+    @Operation(summary = "Xem homestay của chủ nhà", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<List<HomestayResponse>> getByOwner(@PathVariable Long ownerId) {
         return ResponseEntity.ok(homestayService.getHomestaysByOwner(ownerId).stream().map(HomestayResponse::from).toList());
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Xem chi tiết homestay", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<HomestayResponse> getById(@PathVariable Long id) {
         return homestayService.getHomestayById(id)
                 .map(HomestayResponse::from).map(ResponseEntity::ok)
@@ -53,18 +62,21 @@ public class HomestayController {
     }
 
     @PostMapping
+    @Operation(summary = "Tạo homestay", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<HomestayResponse> create(@Valid @RequestBody HomestayRequest request) {
         Homestay homestay = toEntity(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(HomestayResponse.from(homestayService.createHomestay(homestay, request.ownerId())));
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Cập nhật homestay", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<HomestayResponse> update(@PathVariable Long id, @Valid @RequestBody HomestayRequest request) {
         return homestayService.updateHomestay(id, toEntity(request), request.ownerId()).map(HomestayResponse::from).map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Xóa homestay", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<String> delete(@PathVariable Long id) {
         boolean isDeleted = homestayService.deleteHomestay(id);
         if (!isDeleted) {
@@ -81,7 +93,10 @@ public class HomestayController {
         homestay.setDescription(request.description());
         homestay.setPrice(request.price());
         homestay.setNumberOfGuests(request.numberOfGuests());
-        homestay.setAvailable(request.available());
+        homestay.setStatus(request.status() != null
+                ? request.status()
+                : request.available() == null || request.available()
+                        ? HomestayStatus.APPROVED : HomestayStatus.INACTIVE);
         return homestay;
     }
 }

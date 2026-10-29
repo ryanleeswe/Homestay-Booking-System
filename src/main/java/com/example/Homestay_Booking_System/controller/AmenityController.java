@@ -16,8 +16,12 @@ import com.example.Homestay_Booking_System.dto.response.AmenityResponse;
 import com.example.Homestay_Booking_System.repository.AmenityRepository;
 import com.example.Homestay_Booking_System.repository.HomestayRepository;
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
+@Tag(name = "Amenities", description = "Quản lý tiện ích homestay")
 public class AmenityController {
     private final AmenityRepository amenities;
     private final HomestayRepository homestays;
@@ -28,6 +32,7 @@ public class AmenityController {
     }
 
     @PostMapping("/amenities")
+    @Operation(summary = "Tạo tiện ích", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<AmenityResponse> create(@Valid @RequestBody AmenityRequest request) {
         Amenity amenity = new Amenity();
         amenity.setName(request.name());
@@ -35,6 +40,7 @@ public class AmenityController {
     }
 
     @PostMapping("/homestays/{homestayId}/amenities/{amenityId}")
+    @Operation(summary = "Gắn tiện ích vào homestay", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<Void> attach(@PathVariable Long homestayId, @PathVariable Long amenityId) {
         Homestay homestay = homestays.findById(homestayId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Homestay not found"));
@@ -47,6 +53,7 @@ public class AmenityController {
     }
 
     @GetMapping("/homestays/{homestayId}/amenities")
+    @Operation(summary = "Xem các tiện ích của homestay", security = @SecurityRequirement(name = "bearerAuth"))
     public List<AmenityResponse> listForHomestay(@PathVariable Long homestayId) {
         Homestay homestay = homestays.findById(homestayId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Homestay not found"));
